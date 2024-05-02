@@ -73,4 +73,21 @@ class User extends Authenticatable
     {
         return $this->is_admin;
     }
+
+    /**
+     * Get the user's redirect route based on their role.
+     * 
+     * @return string
+     */
+    public function getRedirectRoute(): string
+    {
+        switch ($this->is_admin) {
+            case true:
+                return '/admin/dashboard';
+            case false:
+                return '/dashboard';
+            default:
+                return '/';
+        }
+    }
 }
