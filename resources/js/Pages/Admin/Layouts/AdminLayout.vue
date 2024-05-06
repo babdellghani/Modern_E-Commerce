@@ -1,9 +1,17 @@
 <script setup>
-import { onMounted } from "vue";
+import { Head } from '@inertiajs/vue3';
+import { defineProps, onMounted } from "vue";
 import { initFlowbite } from "flowbite";
-import { Head } from "@inertiajs/vue3";
 import Navbar from "../Components/Navbar.vue";
 import Sidebar from "../Components/Sidebar.vue";
+
+const props = defineProps({
+  title: {
+    type: String,
+    required: true
+  }
+});
+
 // initialize components based on data attribute selectors
 onMounted(() => {
     initFlowbite();
