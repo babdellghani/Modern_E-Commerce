@@ -1,5 +1,5 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link } from "@inertiajs/vue3";
 </script>
 
 <template>
@@ -42,20 +42,37 @@ import { Link } from '@inertiajs/vue3';
                     </svg>
                     <span class="sr-only">Toggle sidebar</span>
                 </button>
-                <a
-                    href="https://flowbite.com"
-                    class="flex items-center justify-between mr-4"
+                <Link
+                    :href="route('admin.dashboard')"
+                    class="flex items-center justify-between mr-4 gap-3"
                 >
-                    <img
-                        src="https://flowbite.s3.amazonaws.com/logo.svg"
-                        class="mr-3 h-8"
-                        alt="Flowbite Logo"
-                    />
-                    <span
-                        class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
-                        >Flowbite</span
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-store"
                     >
-                </a>
+                        <path
+                            d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"
+                        />
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                        <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4" />
+                        <path d="M2 7h20" />
+                        <path
+                            d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"
+                        />
+                    </svg>
+                    <span
+                        class="self-center text-2xl font-extrabold tracking-bold whitespace-nowrap dark:text-white"
+                        >V.Shop</span
+                    >
+                </Link>
                 <form action="#" method="GET" class="hidden md:block md:pl-2">
                     <label for="topbar-search" class="sr-only">Search</label>
                     <div class="relative md:w-64 md:w-96">
@@ -79,7 +96,7 @@ import { Link } from '@inertiajs/vue3';
                             type="text"
                             name="email"
                             id="topbar-search"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             placeholder="Search"
                         />
                     </div>
@@ -149,7 +166,7 @@ import { Link } from '@inertiajs/vue3';
                                     alt="Bonnie Green avatar"
                                 />
                                 <div
-                                    class="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 rounded-full border border-white bg-primary-700 dark:border-gray-700"
+                                    class="flex absolute justify-center items-center ml-6 -mt-5 w-5 h-5 rounded-full border border-white bg-blue-700 dark:border-gray-700"
                                 >
                                     <svg
                                         aria-hidden="true"
@@ -179,7 +196,7 @@ import { Link } from '@inertiajs/vue3';
                                     presentation?"
                                 </div>
                                 <div
-                                    class="text-xs font-medium text-primary-600 dark:text-primary-500"
+                                    class="text-xs font-medium text-blue-600 dark:text-blue-500"
                                 >
                                     a few moments ago
                                 </div>
@@ -227,7 +244,7 @@ import { Link } from '@inertiajs/vue3';
                                     started following you.
                                 </div>
                                 <div
-                                    class="text-xs font-medium text-primary-600 dark:text-primary-500"
+                                    class="text-xs font-medium text-blue-600 dark:text-blue-500"
                                 >
                                     10 minutes ago
                                 </div>
@@ -278,7 +295,7 @@ import { Link } from '@inertiajs/vue3';
                                     stories.
                                 </div>
                                 <div
-                                    class="text-xs font-medium text-primary-600 dark:text-primary-500"
+                                    class="text-xs font-medium text-blue-600 dark:text-blue-500"
                                 >
                                     44 minutes ago
                                 </div>
@@ -322,13 +339,13 @@ import { Link } from '@inertiajs/vue3';
                                     >
                                     mentioned you in a comment:
                                     <span
-                                        class="font-medium text-primary-600 dark:text-primary-500"
+                                        class="font-medium text-blue-600 dark:text-blue-500"
                                         >@bonnie.green</span
                                     >
                                     what do you say?
                                 </div>
                                 <div
-                                    class="text-xs font-medium text-primary-600 dark:text-primary-500"
+                                    class="text-xs font-medium text-blue-600 dark:text-blue-500"
                                 >
                                     1 hour ago
                                 </div>
@@ -372,7 +389,7 @@ import { Link } from '@inertiajs/vue3';
                                     how to implement the new design trend.
                                 </div>
                                 <div
-                                    class="text-xs font-medium text-primary-600 dark:text-primary-500"
+                                    class="text-xs font-medium text-blue-600 dark:text-blue-500"
                                 >
                                     3 hours ago
                                 </div>
@@ -718,42 +735,6 @@ import { Link } from '@inertiajs/vue3';
                                 </svg>
                                 Collections</a
                             >
-                        </li>
-                        <li>
-                            <a
-                                href="#"
-                                class="flex justify-between items-center py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                            >
-                                <span class="flex items-center">
-                                    <svg
-                                        aria-hidden="true"
-                                        class="mr-2 w-5 h-5 text-primary-600 dark:text-primary-500"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            fill-rule="evenodd"
-                                            d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z"
-                                            clip-rule="evenodd"
-                                        ></path>
-                                    </svg>
-                                    Pro version
-                                </span>
-                                <svg
-                                    aria-hidden="true"
-                                    class="w-5 h-5 text-gray-400"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                        clip-rule="evenodd"
-                                    ></path>
-                                </svg>
-                            </a>
                         </li>
                     </ul>
                     <ul

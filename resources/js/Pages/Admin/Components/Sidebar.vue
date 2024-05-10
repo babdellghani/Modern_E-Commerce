@@ -1,3 +1,7 @@
+<script setup>
+import { Link } from "@inertiajs/vue3";
+</script>
+
 <template>
     <aside
         class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
@@ -28,15 +32,15 @@
                         type="text"
                         name="search"
                         id="sidebar-search"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Search"
                     />
                 </div>
             </form>
             <ul class="space-y-2">
                 <li>
-                    <a
-                        href="#"
+                    <Link
+                        :href="route('admin.dashboard')"
                         class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
                     >
                         <svg
@@ -53,8 +57,8 @@
                                 d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"
                             ></path>
                         </svg>
-                        <span class="ml-3">Overview</span>
-                    </a>
+                        <span class="ml-3">Dashboard</span>
+                    </Link>
                 </li>
                 <li>
                     <button
@@ -95,10 +99,10 @@
                     </button>
                     <ul id="dropdown-pages" class="hidden py-2 space-y-2">
                         <li>
-                            <a
-                                href="#"
+                            <Link
+                                :href="route('admin.products.index')"
                                 class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                                >Product</a
+                                >Product</Link
                             >
                         </li>
                         <li>
@@ -201,7 +205,7 @@
                             >Messages</span
                         >
                         <span
-                            class="inline-flex justify-center items-center w-5 h-5 text-xs font-semibold rounded-full text-primary-800 bg-primary-100 dark:bg-primary-200 dark:text-primary-800"
+                            class="inline-flex justify-center items-center w-5 h-5 text-xs font-semibold rounded-full text-blue-800 bg-blue-100 dark:bg-blue-200 dark:text-blue-800"
                         >
                             4
                         </span>
@@ -247,7 +251,7 @@
                         >
                             <path
                                 fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0 .993-.241 1.929-.668 2.754l-1.524-1.525a3.997 3.997 0 00.078-2.183l1.562-1.562C15.802 8.249 16 9.1 16 10zm-5.165 3.913l1.58 1.58A5.98 5.98 0 0110 16a5.976 5.976 0 01-2.516-.552l1.562-1.562a4.006 4.006 0 001.789.027zm-4.677-2.796a4.002 4.002 0 01-.041-2.08l-.08.08-1.53-1.533A5.98 5.98 0 004 10c0 .954.223 1.856.619 2.657l1.54-1.54zm1.088-6.45A5.974 5.974 0 0110 4c.954 0 1.856.223 2.657.619l-1.54 1.54a4.002 4.002 0 00-2.346.033L7.246 4.668zM12 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
                                 clip-rule="evenodd"
                             ></path>
                         </svg>
@@ -259,22 +263,6 @@
         <div
             class="hidden absolute bottom-0 left-0 justify-center p-4 space-x-4 w-full lg:flex bg-white dark:bg-gray-800 z-20"
         >
-            <a
-                href="#"
-                class="inline-flex justify-center p-2 text-gray-500 rounded cursor-pointer dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-600"
-            >
-                <svg
-                    aria-hidden="true"
-                    class="w-6 h-6"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <path
-                        d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z"
-                    ></path>
-                </svg>
-            </a>
             <a
                 href="#"
                 data-tooltip-target="tooltip-settings"
@@ -346,7 +334,7 @@
                     </g>
                 </svg>
             </button>
-            <!-- Dropdown -->
+            <!-- Dropdown Language -->
             <div
                 class="hidden z-50 my-4 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700"
                 id="language-dropdown"
@@ -420,94 +408,6 @@
                                     />
                                 </svg>
                                 Deutsch
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="#"
-                            class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-600"
-                            role="menuitem"
-                        >
-                            <div class="inline-flex items-center">
-                                <svg
-                                    aria-hidden="true"
-                                    class="h-3.5 w-3.5 rounded-full mr-2"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    id="flag-icon-css-it"
-                                    viewBox="0 0 512 512"
-                                >
-                                    <g fill-rule="evenodd" stroke-width="1pt">
-                                        <path fill="#fff" d="M0 0h512v512H0z" />
-                                        <path
-                                            fill="#009246"
-                                            d="M0 0h170.7v512H0z"
-                                        />
-                                        <path
-                                            fill="#ce2b37"
-                                            d="M341.3 0H512v512H341.3z"
-                                        />
-                                    </g>
-                                </svg>
-                                Italiano
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="#"
-                            class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:text-white dark:text-gray-300 dark:hover:bg-gray-600"
-                            role="menuitem"
-                        >
-                            <div class="inline-flex items-center">
-                                <svg
-                                    aria-hidden="true"
-                                    class="h-3.5 w-3.5 rounded-full mr-2"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    xmlns:xlink="http://www.w3.org/1999/xlink"
-                                    id="flag-icon-css-cn"
-                                    viewBox="0 0 512 512"
-                                >
-                                    <defs>
-                                        <path
-                                            id="a"
-                                            fill="#ffde00"
-                                            d="M1-.3L-.7.8 0-1 .6.8-1-.3z"
-                                        />
-                                    </defs>
-                                    <path fill="#de2910" d="M0 0h512v512H0z" />
-                                    <use
-                                        width="30"
-                                        height="20"
-                                        transform="matrix(76.8 0 0 76.8 128 128)"
-                                        xlink:href="#a"
-                                    />
-                                    <use
-                                        width="30"
-                                        height="20"
-                                        transform="rotate(-121 142.6 -47) scale(25.5827)"
-                                        xlink:href="#a"
-                                    />
-                                    <use
-                                        width="30"
-                                        height="20"
-                                        transform="rotate(-98.1 198 -82) scale(25.6)"
-                                        xlink:href="#a"
-                                    />
-                                    <use
-                                        width="30"
-                                        height="20"
-                                        transform="rotate(-74 272.4 -114) scale(25.6137)"
-                                        xlink:href="#a"
-                                    />
-                                    <use
-                                        width="30"
-                                        height="20"
-                                        transform="matrix(16 -19.968 19.968 16 256 230.4)"
-                                        xlink:href="#a"
-                                    />
-                                </svg>
-                                中文 (繁體)
                             </div>
                         </a>
                     </li>
