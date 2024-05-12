@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Models\Brand;
 use Illuminate\Http\Request;
+use App\Http\Requests\BrandRequest;
+use App\Http\Controllers\Controller;
 
 class BrandController extends Controller
 {
@@ -26,9 +28,11 @@ class BrandController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(BrandRequest $request)
     {
-        //
+        $brandData = $request->validated();
+        Brand::create($brandData);
+        return redirect()->route('admin.brands.index')->with('success', 'Brand created successfully');
     }
 
     /**
@@ -50,9 +54,12 @@ class BrandController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(BrandRequest $request, string $id)
     {
-        //
+        $brandData = $request->validated();
+        $brand = Brand::findOrFail($id);
+        $brand->update($brandData);
+        return redirect()->route('admin.brands.index')->with('success', 'Brand updated successfully');
     }
 
     /**
@@ -60,6 +67,8 @@ class BrandController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $brand = Brand::findOrFail($id);
+        $brand->delete();
+        return redirect()->route('admin.brands.index')->with('success', 'Brand deleted successfully');
     }
 }
