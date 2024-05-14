@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\File;
 use App\Http\Requests\ProductRequest;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -20,23 +21,15 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::all();
-        return Inertia::render('Admin/Product/Index', [
-            'products' => $products
-        ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $categories = Category::all();
         $brands = Brand::all();
-        return Inertia::render('Admin/Product/Create', [
-            'categories' => $categories,
-            'brands' => $brands
+        $categories = Category::all();
+        return Inertia::render('Admin/Product/Index', [
+            'products' => $products,
+            'brands' => $brands,
+            'categories' => $categories
         ]);
     }
+    
 
     /**
      * Store a newly created resource in storage.
@@ -60,6 +53,8 @@ class ProductController extends Controller
             }
         }
 
+        $productData['created_by'] = Auth::user()->id;
+
         Product::create($productData);
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully');
     }
@@ -68,14 +63,6 @@ class ProductController extends Controller
      * Display the specified resource.
      */
     public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
     {
         //
     }
@@ -116,6 +103,9 @@ class ProductController extends Controller
                 ]);
             }
         }
+
+        $productData['updated_by'] = Auth::user()->id;
+
         $product->update($productData);
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully');
     }
@@ -126,6 +116,18 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         $product = Product::findOrFail($id);
+
+        // Delete images
+        $productImage = ProductImage::where('product_id', $id)->get();
+        if (count($productImage) > 0) {
+            foreach ($productImage as $image) {
+                File::delete(storage_path('app/public/' . $image->image));
+                $image->delete();
+            }
+        }
+
+        // Delete product
+        $product->deleted_by = Auth::user()->id;
         $product->delete();
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully');
     }

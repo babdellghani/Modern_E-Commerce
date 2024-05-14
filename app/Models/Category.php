@@ -8,7 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Category extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = ['name', 'slug', 'description'];
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

@@ -1,13 +1,17 @@
 <script setup>
 import AdminLayout from "@/Pages/Admin/Layouts/AdminLayout.vue";
 import { usePage } from "@inertiajs/vue3";
+import Create from "./Create.vue";
+import { ref } from 'vue';
 
-const { products } = usePage().props;
 
-const togglePublished = (product) => {
-    product.published = !product.published;
-    console.log(product);
-}
+const products = ref(usePage().props.products);
+
+// Refresh products
+const refreshProducts = () => {
+  products.value = usePage().props.products;
+};
+
 </script>
 
 <template>
@@ -33,8 +37,12 @@ const togglePublished = (product) => {
                         <div
                             class="flex flex-col flex-shrink-0 space-y-3 md:flex-row md:items-center lg:justify-end md:space-y-0 md:space-x-3"
                         >
+                            <!-- Modal toggle -->
                             <button
                                 type="button"
+                                id="defaultModalButton"
+                                data-modal-target="defaultModal"
+                                data-modal-toggle="defaultModal"
                                 class="flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
                             >
                                 <svg
@@ -52,6 +60,8 @@ const togglePublished = (product) => {
                                 </svg>
                                 Add new product
                             </button>
+                            <!-- Main modal -->
+                            <Create :refreshProducts="refreshProducts" />
                         </div>
                     </div>
                     <div class="overflow-x-auto">
