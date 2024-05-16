@@ -1,12 +1,13 @@
 <script setup>
 import { router, useForm } from "@inertiajs/vue3";
 import { usePage } from "@inertiajs/vue3";
-import { watch } from "vue";
-import { errorMessages } from "vue/compiler-sfc";
+import { ref, watch } from "vue";
 
+// Variables
 const { categories } = usePage().props;
 const { brands } = usePage().props;
 
+// Form
 const form = useForm({
     name: "",
     slug: "",
@@ -14,12 +15,24 @@ const form = useForm({
     price: "",
     category_id: "",
     brand_id: "",
-    image: null,
+    imagesView: [],
+    images: [],
     quantity: "",
     published: true,
     in_stock: true,
     errors: {},
 });
+
+// Image
+
+const handleFileChange = (file) => {
+    form.imagesView.push(file);
+    form.images = form.imagesView.map((file) => file.raw);
+};
+
+const handleFileRemove = (file) => {
+    console.log(file);
+};
 
 const props = defineProps({
     refreshProducts: {
@@ -28,6 +41,8 @@ const props = defineProps({
     },
 });
 
+// Add Product
+const FormSubmited = ref(false);
 const AddProduct = async () => {
     try {
         await router.post("/admin/products/store", form, {
@@ -37,17 +52,23 @@ const AddProduct = async () => {
                 form.errors = {};
                 document.getElementById("defaultModal").click();
                 props.refreshProducts();
+                FormSubmited.value = true;
+                setTimeout(() => {
+                    FormSubmited.value = false;
+                }, 3000);
             },
             onError: (error) => {
                 form.errors = error || {};
+                console.log(error);
             },
         });
     } catch (error) {
-        $page.$props.errors = error;
+        console.log(error);
         document.getElementById("defaultModal").click();
     }
 };
 
+// Watch For Form Changes
 watch(
     [
         () => form.name,
@@ -56,7 +77,7 @@ watch(
         () => form.price,
         () => form.brand_id,
         () => form.category_id,
-        () => form.image,
+        () => form.images,
         () => form.quantity,
         () => form.published,
         () => form.in_stock,
@@ -69,7 +90,7 @@ watch(
             newPrice,
             newBrandId,
             newCategoryId,
-            newImage,
+            newImages,
             newQuantity,
             newPublished,
             newInStock,
@@ -81,7 +102,7 @@ watch(
             oldPrice,
             oldBrandId,
             oldCategoryId,
-            oldImage,
+            oldImages,
             oldQuantity,
             oldPublished,
             oldInStock,
@@ -112,6 +133,7 @@ watch(
             "dark:focus:ring-blue-500",
             "dark:focus:border-blue-500",
         ];
+        if (FormSubmited.value) return;
         if (newName !== oldName) {
             form.errors.name = undefined;
             const nameElement = document.getElementById("name");
@@ -178,16 +200,8 @@ watch(
                 categoryElement.classList.remove(...classError);
             }
         }
-        if (newImage !== oldImage) {
-            form.errors.image = undefined;
-            const imageElement = document.getElementById("image");
-            if (newImage === "") {
-                imageElement.classList.add(...classError);
-                imageElement.classList.remove(...classSuccess);
-            } else {
-                imageElement.classList.add(...classSuccess);
-                imageElement.classList.remove(...classError);
-            }
+        if (newImages !== oldImages) {
+            form.errors.images = undefined;
         }
         if (newQuantity !== oldQuantity) {
             form.errors.quantity = undefined;
@@ -397,7 +411,9 @@ watch(
                                         : 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
                                 ]"
                             >
-                                <option selected disabled value="">Select Brand</option>
+                                <option selected disabled value="">
+                                    Select Brand
+                                </option>
                                 <option
                                     v-for="brand in brands"
                                     :value="brand.id"
@@ -429,7 +445,9 @@ watch(
                                         : 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
                                 ]"
                             >
-                                <option selected disabled value="">Select Category</option>
+                                <option selected disabled value="">
+                                    Select Category
+                                </option>
                                 <option
                                     v-for="category in categories"
                                     :value="category.id"
@@ -524,20 +542,24 @@ watch(
                             <label
                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                 for="multiple_files"
-                                >Upload multiple files</label
+                                >Upload Images</label
                             >
-                            <input
-                                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-                                id="multiple_files"
-                                type="file"
-                                name="image[]"
+                            <el-upload
+                                id="images"
+                                v-model:file-list="form.imagesView"
                                 multiple
-                            />
+                                list-type="picture-card"
+                                :on-remove="handleFileRemove"
+                                :on-change="handleFileChange"
+                            >
+                                <el-icon></el-icon>
+                            </el-upload>
+                            
                             <p
-                                v-if="form.errors.image"
+                                v-if="form.errors.images"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
-                                {{ form.errors.image }}
+                                {{ form.errors.images }}
                             </p>
                         </div>
                     </div>

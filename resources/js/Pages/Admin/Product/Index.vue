@@ -1,21 +1,61 @@
 <script setup>
 import AdminLayout from "@/Pages/Admin/Layouts/AdminLayout.vue";
-import { usePage } from "@inertiajs/vue3";
+import { router, usePage } from "@inertiajs/vue3";
 import Create from "./Create.vue";
-import { ref } from 'vue';
-
+import { ref, watch } from "vue";
+import Edit from "./Edit.vue";
 
 const products = ref(usePage().props.products);
 
 // Refresh products
 const refreshProducts = () => {
-  products.value = usePage().props.products;
+    products.value = usePage().props.products;
 };
 
+// Change Published
+const ChangePublished = async (id) => {
+    try {
+        const productIndex = products.value.findIndex((p) => p.id === id);
+        if (productIndex !== -1) {
+            // Toggle the published status immediately in the UI
+            products.value[productIndex].published =
+                !products.value[productIndex].published;
+        }
+        await router.post(
+            "/admin/products/" + id + "/published",
+            {},
+            {
+                preserveState: true,
+                preserveScroll: true,
+                scroll: false,
+                onError: (error) => {
+                    if (productIndex !== -1) {
+                        products.value[productIndex].published =
+                            !products.value[productIndex].published;
+                    }
+                    console.log(error);
+                },
+            }
+        );
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+watch(products, (value) => {
+    console.log(value);
+});
 </script>
 
 <template>
     <AdminLayout title="Products">
+        <!-- Main modal -->
+        <Create :refreshProducts="refreshProducts" />
+
+        <!-- Main modal -->
+        <Edit :refreshProducts="refreshProducts" />
+
+
         <section class="bg-gray-50 dark:bg-gray-900 py-3 sm:py-5">
             <div class="px-4 mx-auto max-w-screen-2xl lg:px-12">
                 <div
@@ -24,16 +64,6 @@ const refreshProducts = () => {
                     <div
                         class="flex flex-col px-4 py-3 space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 lg:space-x-4"
                     >
-                        <div class="flex items-center flex-1 space-x-4">
-                            <h5>
-                                <span class="text-gray-500">All Products:</span>
-                                <span class="dark:text-white">123456</span>
-                            </h5>
-                            <h5>
-                                <span class="text-gray-500">Total sales:</span>
-                                <span class="dark:text-white">$88.4k</span>
-                            </h5>
-                        </div>
                         <div
                             class="flex flex-col flex-shrink-0 space-y-3 md:flex-row md:items-center lg:justify-end md:space-y-0 md:space-x-3"
                         >
@@ -60,8 +90,6 @@ const refreshProducts = () => {
                                 </svg>
                                 Add new product
                             </button>
-                            <!-- Main modal -->
-                            <Create :refreshProducts="refreshProducts" />
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -92,16 +120,17 @@ const refreshProducts = () => {
                                     <th scope="col" class="px-4 py-3">
                                         Category
                                     </th>
+                                    <th scope="col" class="px-4 py-3">Brand</th>
                                     <th scope="col" class="px-4 py-3">Stock</th>
-                                    <th scope="col" class="px-4 py-3">
-                                        Rating
-                                    </th>
                                     <th scope="col" class="px-4 py-3">
                                         Status
                                     </th>
                                     <th scope="col" class="px-4 py-3">Price</th>
                                     <th scope="col" class="px-4 py-3">
                                         Last Update
+                                    </th>
+                                    <th scope="col" class="px-4 py-3">
+                                        Actions
                                     </th>
                                 </tr>
                             </thead>
@@ -140,7 +169,13 @@ const refreshProducts = () => {
                                     <td class="px-4 py-2">
                                         <span
                                             class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
-                                            >{{ product.category_id }}</span
+                                            >{{ product.category.name }}</span
+                                        >
+                                    </td>
+                                    <td class="px-4 py-2">
+                                        <span
+                                            class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-green-900 dark:text-green-300"
+                                            >{{ product.brand.name }}</span
                                         >
                                     </td>
                                     <td
@@ -148,74 +183,16 @@ const refreshProducts = () => {
                                     >
                                         <div class="flex items-center">
                                             <div
-                                                class="inline-block w-4 h-4 mr-2 bg-red-700 rounded-full"
+                                                :class="[
+                                                    'inline-block w-4 h-4 mr-2 rounded-full',
+                                                    product.quantity <= 20
+                                                        ? product.quantity <= 10
+                                                            ? 'bg-red-500'
+                                                            : 'bg-yellow-500'
+                                                        : 'bg-green-500',
+                                                ]"
                                             ></div>
                                             {{ product.quantity }}
-                                        </div>
-                                    </td>
-                                    <td
-                                        class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                                    >
-                                        <div class="flex items-center">
-                                            <svg
-                                                aria-hidden="true"
-                                                class="w-5 h-5 text-yellow-400"
-                                                fill="currentColor"
-                                                viewbox="0 0 20 20"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <path
-                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                                                />
-                                            </svg>
-                                            <svg
-                                                aria-hidden="true"
-                                                class="w-5 h-5 text-yellow-400"
-                                                fill="currentColor"
-                                                viewbox="0 0 20 20"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <path
-                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                                                />
-                                            </svg>
-                                            <svg
-                                                aria-hidden="true"
-                                                class="w-5 h-5 text-yellow-400"
-                                                fill="currentColor"
-                                                viewbox="0 0 20 20"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <path
-                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                                                />
-                                            </svg>
-                                            <svg
-                                                aria-hidden="true"
-                                                class="w-5 h-5 text-yellow-400"
-                                                fill="currentColor"
-                                                viewbox="0 0 20 20"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <path
-                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                                                />
-                                            </svg>
-                                            <svg
-                                                aria-hidden="true"
-                                                class="w-5 h-5 text-yellow-400"
-                                                fill="currentColor"
-                                                viewbox="0 0 20 20"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <path
-                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                                                />
-                                            </svg>
-                                            <span
-                                                class="ml-1 text-gray-500 dark:text-gray-400"
-                                                >5.0</span
-                                            >
                                         </div>
                                     </td>
                                     <td
@@ -224,20 +201,26 @@ const refreshProducts = () => {
                                         <label
                                             class="inline-flex items-center me-5 cursor-pointer"
                                         >
-                                            <input
-                                                type="checkbox"
-                                                class="sr-only peer"
-                                                :checked="product.published"
-                                                @change="togglePublished"
-                                            />
-                                            <div
-                                                :class="[
-                                                    'relative w-11 h-6 rounded-full peer-focus:ring-4  peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all',
-                                                    product.published
-                                                        ? ' bg-gray-200 dark:bg-gray-700 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 dark:border-gray-600 peer-checked:bg-green-600'
-                                                        : 'bg-red-200 dark:bg-red-700 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 dark:border-gray-600 peer-checked:bg-green-600',
-                                                ]"
-                                            ></div>
+                                            <form @submit.prevent>
+                                                <input
+                                                    type="checkbox"
+                                                    class="sr-only peer"
+                                                    :checked="product.published"
+                                                    @change="
+                                                        ChangePublished(
+                                                            product.id
+                                                        )
+                                                    "
+                                                />
+                                                <div
+                                                    :class="[
+                                                        'relative w-11 h-6 rounded-full peer-focus:ring-4  peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all',
+                                                        product.published
+                                                            ? ' bg-gray-200 dark:bg-gray-700 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 dark:border-gray-600 peer-checked:bg-green-600'
+                                                            : 'bg-red-200 dark:bg-red-700 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 dark:border-gray-600 peer-checked:bg-green-600',
+                                                    ]"
+                                                ></div>
+                                            </form>
                                         </label>
                                     </td>
                                     <td class="px-4 py-2">
@@ -246,7 +229,65 @@ const refreshProducts = () => {
                                     <td
                                         class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                                     >
-                                        Just now
+                                        {{ product.updated_at.slice(0, 10) }}
+                                    </td>
+                                    <td
+                                        class="px-4 py-3 flex items-center justify-end"
+                                    >
+                                        <button
+                                            :id="`${product.id}-dropdown-button`"
+                                            :data-dropdown-toggle="`${product.id}-dropdown`"
+                                            class="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100"
+                                            type="button"
+                                        >
+                                            <svg
+                                                class="w-5 h-5"
+                                                aria-hidden="true"
+                                                fill="currentColor"
+                                                viewbox="0 0 20 20"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <path
+                                                    d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"
+                                                />
+                                            </svg>
+                                        </button>
+                                        <div
+                                            :id="`${product.id}-dropdown`"
+                                            class="hidden z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600"
+                                        >
+                                            <ul
+                                                class="py-1 text-sm text-gray-700 dark:text-gray-200"
+                                                :aria-labelledby="`${product.id}-dropdown-button`"
+                                            >
+                                                <li>
+                                                    <a
+                                                        href="#"
+                                                        class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                        >Show</a
+                                                    >
+                                                </li>
+                                                <li>
+                                                    <!-- Modal toggle -->
+                                                    <a
+                                                        type="button"
+                                                        id="defaultModalButtonEdit"
+                                                        data-modal-target="defaultModalEdit"
+                                                        data-modal-toggle="defaultModalEdit"
+                                                        class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer"
+                                                    >
+                                                        Add new product
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                            <div class="py-1">
+                                                <a
+                                                    href="#"
+                                                    class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                                                    >Delete</a
+                                                >
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>

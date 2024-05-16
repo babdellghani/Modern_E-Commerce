@@ -20,7 +20,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::all();
+        $products = Product::with('brand', 'category')->get();
         $brands = Brand::all();
         $categories = Category::all();
         return Inertia::render('Admin/Product/Index', [
@@ -29,7 +29,7 @@ class ProductController extends Controller
             'categories' => $categories
         ]);
     }
-    
+
 
     /**
      * Store a newly created resource in storage.
@@ -38,33 +38,45 @@ class ProductController extends Controller
     {
         $productData = $request->validated();
 
-        // Upload images
+        // Validate images
         $request->validate([
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048']
+            'images' => ['nullable', 'array', 'max:10'],
+            'images.*' => ['image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048']
         ]);
-        if ($request->hasFile('image')) {
-            $productImage = $request->file('image');
+
+        // Create product
+        $productData['created_by'] = Auth::user()->id;
+        $product = Product::create($productData);
+
+        // Upload images
+        if ($request->hasFile('images')) {
+            $productImage = $request->file('images');
             foreach ($productImage as $image) {
-                $image = $productImage->store('products', 'public');
+                $image = $image->store('products', 'public');
                 ProductImage::create([
-                    'product_id' => $productData['id'],
+                    'product_id' => $product->id,
                     'image' => $image
                 ]);
             }
         }
 
-        $productData['created_by'] = Auth::user()->id;
-
-        Product::create($productData);
+        // Redirect to index
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully');
     }
 
     /**
-     * Display the specified resource.
+     * Change Product Published.
      */
-    public function show(string $id)
+    public function changePublished(string $id)
     {
-        //
+        $product = Product::findOrFail($id);
+        $product->published = !$product->published;
+        $product->save();
+        if ($product->published) {
+            return redirect()->route('admin.products.index')->with('success', 'Product published successfully');
+        } else {
+            return redirect()->route('admin.products.index')->with('success', 'Product unpublished successfully');
+        }
     }
 
     /**
@@ -75,14 +87,14 @@ class ProductController extends Controller
         $productData = $request->validated();
         $product = Product::findOrFail($id);
 
-        // Upload images
         // Validate images
         $request->validate([
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048']
+            'images' => ['nullable', 'array', 'max:10'],
+            'images.*' => ['image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048']
         ]);
 
         // Upload images
-        if ($request->hasFile('image')) {
+        if ($request->hasFile('images')) {
 
             // Delete old images
             $productImageOld = ProductImage::where('product_id', $id)->get();
@@ -94,19 +106,21 @@ class ProductController extends Controller
             }
 
             // Upload new images
-            $productImage = $request->file('image');
+            $productImage = $request->file('images');
             foreach ($productImage as $image) {
-                $image = $productImage->store('products', 'public');
+                $image = $image->store('products', 'public');
                 ProductImage::create([
-                    'product_id' => $productData['id'],
+                    'product_id' => $product->id,
                     'image' => $image
                 ]);
             }
         }
 
+        // Update product
         $productData['updated_by'] = Auth::user()->id;
-
         $product->update($productData);
+
+        // Redirect to index
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully');
     }
 
