@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class BrandRequest extends FormRequest
@@ -23,7 +24,7 @@ class BrandRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:200'],
-            'slug' => ['required', 'string', 'max:200', 'unique:brands'],
+            'slug' => ['required', 'string', 'max:200', Rule::unique('brands')->ignore($this->brand)],
             'description' => ['nullable', 'string'],
         ];
     }

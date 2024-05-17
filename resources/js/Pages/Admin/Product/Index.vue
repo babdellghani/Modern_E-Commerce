@@ -42,9 +42,15 @@ const ChangePublished = async (id) => {
     }
 };
 
-watch(products, (value) => {
-    console.log(value);
-});
+
+// Edit Product
+const editModalOpen = ref(false);
+const selectedProduct = ref(null);
+
+const openEditModal = (id) => {
+    selectedProduct.value = products.value.find(product => product.id === id);
+    editModalOpen.value = true;
+};
 </script>
 
 <template>
@@ -53,8 +59,13 @@ watch(products, (value) => {
         <Create :refreshProducts="refreshProducts" />
 
         <!-- Main modal -->
-        <Edit :refreshProducts="refreshProducts" />
-
+        <Edit
+            v-if="openEditModal"
+            :open="editModalOpen"
+            :product="selectedProduct"
+            :refreshProducts="refreshProducts"
+            @close="editModalOpen = false"
+        />
 
         <section class="bg-gray-50 dark:bg-gray-900 py-3 sm:py-5">
             <div class="px-4 mx-auto max-w-screen-2xl lg:px-12">
@@ -275,9 +286,13 @@ watch(products, (value) => {
                                                         data-modal-target="defaultModalEdit"
                                                         data-modal-toggle="defaultModalEdit"
                                                         class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer"
+                                                        @click="
+                                                            openEditModal(
+                                                                product.id
+                                                            )
+                                                        "
+                                                        >Edit</a
                                                     >
-                                                        Add new product
-                                                    </a>
                                                 </li>
                                             </ul>
                                             <div class="py-1">

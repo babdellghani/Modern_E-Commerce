@@ -68,6 +68,19 @@ const AddProduct = async () => {
     }
 };
 
+// Slug
+watch(
+    form,
+    () => {
+        form.slug = form.name
+            .toLowerCase()
+            .replace(/ /g, "-")
+            .replace(/[^\w-]+/g, "");
+    },
+    { deep: true }
+);
+
+
 // Watch For Form Changes
 watch(
     [
@@ -350,6 +363,7 @@ watch(
                                 name="price"
                                 id="price"
                                 v-model="form.price"
+                                step="any"
                                 :class="[
                                     'border text-sm rounded-lg block w-full p-2.5',
                                     form.errors.price

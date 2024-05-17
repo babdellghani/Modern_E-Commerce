@@ -10,7 +10,6 @@ const { brands } = usePage().props;
 const props = defineProps({
     product: {
         type: Object,
-        required: true,
     },
     refreshProducts: {
         type: Function,
@@ -18,43 +17,72 @@ const props = defineProps({
     },
 });
 
+
 // Form
-const form = useForm({
-    name: "props.product.name",
-    slug: "props.product.slug",
-    description: "fffffffffff",
-    price: "",
-    category_id: "",
-    brand_id: "",
-    imagesView: [],
+const formm = useForm({
+    name: props.product?.name || "",
+    slug: props.product?.slug || "",
+    description: props.product?.description || "yyy",
+    price: props.product?.price || "",
+    category_id: props.product?.category_id || "",
+    brand_id: props.product?.brand_id || "",
+    imagesView: props.product?.images || [],
     images: [],
-    quantity: "",
-    published: true,
-    in_stock: true,
+    quantity: props.product?.quantity || "",
+    published: props.product?.published ?? true,
+    in_stock: props.product?.in_stock ?? true,
     errors: {},
 });
 
-// Image
 
+// formm reset after prop change
+watch(() => {
+    if (props.product) {
+        formm.name = props.product.name;
+        formm.slug = props.product.slug;
+        formm.description = props.product.description;
+        formm.price = props.product.price;
+        formm.category_id = props.product.category_id;
+        formm.brand_id = props.product.brand_id;
+        formm.imagesView = props.product.images;
+        formm.quantity = props.product.quantity;
+        formm.published = props.product.published;
+        formm.in_stock = props.product.in_stock;
+    }
+});
+
+// Slug
+watch(
+    formm,
+    () => {
+        formm.slug = formm.name
+            .toLowerCase()
+            .replace(/ /g, "-")
+            .replace(/[^\w-]+/g, "");
+    },
+    { deep: true }
+);
+
+// Image
 const handleFileChange = (file) => {
-    form.imagesView.push(file);
-    form.images = form.imagesView.map((file) => file.raw);
+    formm.imagesView.push(file);
+    formm.images = formm.imagesView.map((file) => file.raw);
 };
 
 const handleFileRemove = (file) => {
     console.log(file);
 };
 
-// Add Product
+// Update Product
 const FormSubmited = ref(false);
-const AddProduct = async () => {
+const updateProduct = async () => {
     try {
-        await router.post("/admin/products/store", form, {
+        await router.post("/admin/products/" + props.product.id + "/update", formm, {
             preserveScroll: true,
             onSuccess: () => {
-                form.reset();
-                form.errors = {};
-                document.getElementById("defaultModal").click();
+                formm.reset();
+                formm.errors = {};
+                document.getElementById("defaultModalEdit").click();
                 props.refreshProducts();
                 FormSubmited.value = true;
                 setTimeout(() => {
@@ -62,7 +90,7 @@ const AddProduct = async () => {
                 }, 3000);
             },
             onError: (error) => {
-                form.errors = error || {};
+                formm.errors = error || {};
                 console.log(error);
             },
         });
@@ -75,16 +103,16 @@ const AddProduct = async () => {
 // Watch For Form Changes
 watch(
     [
-        () => form.name,
-        () => form.slug,
-        () => form.description,
-        () => form.price,
-        () => form.brand_id,
-        () => form.category_id,
-        () => form.images,
-        () => form.quantity,
-        () => form.published,
-        () => form.in_stock,
+        () => formm.name,
+        () => formm.slug,
+        () => formm.description,
+        () => formm.price,
+        () => formm.brand_id,
+        () => formm.category_id,
+        () => formm.images,
+        () => formm.quantity,
+        () => formm.published,
+        () => formm.in_stock,
     ],
     (
         [
@@ -139,7 +167,7 @@ watch(
         ];
         if (FormSubmited.value) return;
         if (newName !== oldName) {
-            form.errors.name = undefined;
+            formm.errors.name = undefined;
             const nameElement = document.getElementById("name");
             if (newName === "") {
                 nameElement.classList.add(...classError);
@@ -150,7 +178,7 @@ watch(
             }
         }
         if (newSlug !== oldSlug) {
-            form.errors.slug = undefined;
+            formm.errors.slug = undefined;
             const slugElement = document.getElementById("slug");
             if (newSlug === "") {
                 slugElement.classList.add(...classError);
@@ -161,7 +189,7 @@ watch(
             }
         }
         if (newDescription !== oldDescription) {
-            form.errors.description = undefined;
+            formm.errors.description = undefined;
             const descriptionElement = document.getElementById("description");
             if (newDescription === "") {
                 descriptionElement.classList.add(...classError);
@@ -172,7 +200,7 @@ watch(
             }
         }
         if (newPrice !== oldPrice) {
-            form.errors.price = undefined;
+            formm.errors.price = undefined;
             const priceElement = document.getElementById("price");
             if (newPrice === "") {
                 priceElement.classList.add(...classError);
@@ -183,7 +211,7 @@ watch(
             }
         }
         if (newBrandId !== oldBrandId) {
-            form.errors.brand_id = undefined;
+            formm.errors.brand_id = undefined;
             const brandElement = document.getElementById("brand");
             if (newBrandId === "") {
                 brandElement.classList.add(...classError);
@@ -194,7 +222,7 @@ watch(
             }
         }
         if (newCategoryId !== oldCategoryId) {
-            form.errors.category_id = undefined;
+            formm.errors.category_id = undefined;
             const categoryElement = document.getElementById("category");
             if (newCategoryId === "") {
                 categoryElement.classList.add(...classError);
@@ -205,10 +233,10 @@ watch(
             }
         }
         if (newImages !== oldImages) {
-            form.errors.images = undefined;
+            formm.errors.images = undefined;
         }
         if (newQuantity !== oldQuantity) {
-            form.errors.quantity = undefined;
+            formm.errors.quantity = undefined;
             const quantityElement = document.getElementById("quantity");
             if (newQuantity === "") {
                 quantityElement.classList.add(...classError);
@@ -219,7 +247,7 @@ watch(
             }
         }
         if (newPublished !== oldPublished) {
-            form.errors.published = undefined;
+            formm.errors.published = undefined;
             const publishedElement = document.getElementById("published");
             if (newPublished === "") {
                 publishedElement.classList.add(...classError);
@@ -230,7 +258,7 @@ watch(
             }
         }
         if (newInStock !== oldInStock) {
-            form.errors.in_stock = undefined;
+            formm.errors.in_stock = undefined;
             const inStockElement = document.getElementById("in_stock");
             if (newInStock === "") {
                 inStockElement.classList.add(...classError);
@@ -251,7 +279,7 @@ watch(
         aria-hidden="true"
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
     >
-        <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
+        <div v-if="product" class="relative p-4 w-full max-w-2xl h-full md:h-auto">
             <!-- Modal content -->
             <div
                 class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5"
@@ -263,7 +291,7 @@ watch(
                     <h3
                         class="text-lg font-semibold text-gray-900 dark:text-white"
                     >
-                        Add Product
+                        Edit Product
                     </h3>
                     <button
                         type="button"
@@ -287,7 +315,7 @@ watch(
                     </button>
                 </div>
                 <!-- Modal body -->
-                <form @submit.prevent="AddProduct()">
+                <form @submit.prevent="updateProduct()">
                     <div class="grid gap-4 mb-4 sm:grid-cols-2">
                         <div>
                             <label
@@ -299,10 +327,10 @@ watch(
                                 type="text"
                                 name="name"
                                 id="name"
-                                v-model="form.name"
+                                v-model="formm.name"
                                 :class="[
                                     'border text-sm rounded-lg block w-full p-2.5',
-                                    form.errors.name
+                                    formm.errors.name
                                         ? 'bg-red-50 border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500'
                                         : 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
                                 ]"
@@ -310,10 +338,10 @@ watch(
                                 required=""
                             />
                             <p
-                                v-if="form.errors.name"
+                                v-if="formm.errors.name"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
-                                {{ form.errors.name }}
+                                {{ formm.errors.name }}
                             </p>
                         </div>
                         <div>
@@ -326,10 +354,10 @@ watch(
                                 type="text"
                                 name="slug"
                                 id="slug"
-                                v-model="form.slug"
+                                v-model="formm.slug"
                                 :class="[
                                     'border text-sm rounded-lg block w-full p-2.5',
-                                    form.errors.slug
+                                    formm.errors.slug
                                         ? 'bg-red-50 border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500'
                                         : 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
                                 ]"
@@ -337,10 +365,10 @@ watch(
                                 required=""
                             />
                             <p
-                                v-if="form.errors.slug"
+                                v-if="formm.errors.slug"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
-                                {{ form.errors.slug }}
+                                {{ formm.errors.slug }}
                             </p>
                         </div>
                         <div>
@@ -353,21 +381,22 @@ watch(
                                 type="number"
                                 name="price"
                                 id="price"
-                                v-model="form.price"
+                                v-model="formm.price"
+                                step="any"
                                 :class="[
                                     'border text-sm rounded-lg block w-full p-2.5',
-                                    form.errors.price
+                                    formm.errors.price
                                         ? 'bg-red-50 border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500'
                                         : 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
                                 ]"
                                 placeholder="$2999"
-                                required=""
+                                required
                             />
                             <p
-                                v-if="form.errors.quantity"
+                                v-if="formm.errors.quantity"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
-                                {{ form.errors.quantity }}
+                                {{ formm.errors.quantity }}
                             </p>
                         </div>
 
@@ -381,10 +410,10 @@ watch(
                                 type="number"
                                 name="quantity"
                                 id="quantity"
-                                v-model="form.quantity"
+                                v-model="formm.quantity"
                                 :class="[
                                     'border text-sm rounded-lg block w-full p-2.5',
-                                    form.errors.quantity
+                                    formm.errors.quantity
                                         ? 'bg-red-50 border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500'
                                         : 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
                                 ]"
@@ -392,10 +421,10 @@ watch(
                                 required=""
                             />
                             <p
-                                v-if="form.errors.quantity"
+                                v-if="formm.errors.quantity"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
-                                {{ form.errors.quantity }}
+                                {{ formm.errors.quantity }}
                             </p>
                         </div>
                         <div>
@@ -407,10 +436,10 @@ watch(
                             <select
                                 id="brand"
                                 name="brand_id"
-                                v-model="form.brand_id"
+                                v-model="formm.brand_id"
                                 :class="[
                                     'border text-sm rounded-lg block w-full p-2.5',
-                                    form.errors.brand_id
+                                    formm.errors.brand_id
                                         ? 'bg-red-50 border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500'
                                         : 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
                                 ]"
@@ -426,10 +455,10 @@ watch(
                                 </option>
                             </select>
                             <p
-                                v-if="form.errors.brand_id"
+                                v-if="formm.errors.brand_id"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
-                                {{ form.errors.brand_id }}
+                                {{ formm.errors.brand_id }}
                             </p>
                         </div>
                         <div>
@@ -441,10 +470,10 @@ watch(
                             <select
                                 id="category"
                                 name="category_id"
-                                v-model="form.category_id"
+                                v-model="formm.category_id"
                                 :class="[
                                     'border text-sm rounded-lg block w-full p-2.5',
-                                    form.errors.category_id
+                                    formm.errors.category_id
                                         ? 'bg-red-50 border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500'
                                         : 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
                                 ]"
@@ -460,10 +489,10 @@ watch(
                                 </option>
                             </select>
                             <p
-                                v-if="form.errors.category_id"
+                                v-if="formm.errors.category_id"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
-                                {{ form.errors.category_id }}
+                                {{ formm.errors.category_id }}
                             </p>
                         </div>
                         <div class="sm:col-span-2">
@@ -476,20 +505,20 @@ watch(
                                 id="description"
                                 rows="4"
                                 name="description"
-                                v-model="form.description"
+                                v-model="formm.description"
                                 :class="[
                                     'border text-sm rounded-lg block w-full p-2.5',
-                                    form.errors.description
+                                    formm.errors.description
                                         ? 'bg-red-50 border-red-500 text-red-900 placeholder-red-700 focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500'
                                         : 'bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-600 focus:border-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
                                 ]"
                                 placeholder="Write product description here"
                             ></textarea>
                             <p
-                                v-if="form.errors.description"
+                                v-if="formm.errors.description"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
-                                {{ form.errors.description }}
+                                {{ formm.errors.description }}
                             </p>
                         </div>
 
@@ -500,8 +529,8 @@ watch(
                                 name="published"
                                 id="published"
                                 class="sr-only peer"
-                                v-model="form.published"
-                                checked
+                                v-model="formm.published"
+                                :checked="formm.published"
                             />
                             <div
                                 class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
@@ -511,10 +540,10 @@ watch(
                                 >Published</span
                             >
                             <p
-                                v-if="form.errors.published"
+                                v-if="formm.errors.published"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
-                                {{ form.errors.published }}
+                                {{ formm.errors.published }}
                             </p>
                         </label>
 
@@ -524,9 +553,9 @@ watch(
                                 value=""
                                 name="in_stock"
                                 id="in_stock"
-                                v-model="form.in_stock"
+                                v-model="formm.in_stock"
                                 class="sr-only peer"
-                                checked
+                                :checked="formm.in_stock"
                             />
                             <div
                                 class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
@@ -536,10 +565,10 @@ watch(
                                 >In stock</span
                             >
                             <p
-                                v-if="form.errors.in_stock"
+                                v-if="formm.errors.in_stock"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
-                                {{ form.errors.in_stock }}
+                                {{ formm.errors.in_stock }}
                             </p>
                         </label>
                         <div class="sm:col-span-2">
@@ -550,20 +579,21 @@ watch(
                             >
                             <el-upload
                                 id="images"
-                                v-model:file-list="form.imagesView"
+                                v-model:file-list="formm.imagesView"
                                 multiple
                                 list-type="picture-card"
                                 :on-remove="handleFileRemove"
                                 :on-change="handleFileChange"
                             >
+                                <img v-if="formm.images" :src="formm.images" alt="">
                                 <el-icon></el-icon>
                             </el-upload>
-                            
+
                             <p
-                                v-if="form.errors.images"
+                                v-if="formm.errors.images"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
-                                {{ form.errors.images }}
+                                {{ formm.errors.images }}
                             </p>
                         </div>
                     </div>
