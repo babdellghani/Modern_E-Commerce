@@ -24,16 +24,12 @@ const form = useForm({
 });
 
 // Image
-
 const handleFileChange = (file) => {
     form.imagesView.push(file);
     form.images = form.imagesView.map((file) => file.raw);
 };
 
-const handleFileRemove = (file) => {
-    console.log(file);
-};
-
+// Define Props
 const props = defineProps({
     refreshProducts: {
         type: Function,
@@ -563,7 +559,6 @@ watch(
                                 v-model:file-list="form.imagesView"
                                 multiple
                                 list-type="picture-card"
-                                :on-remove="handleFileRemove"
                                 :on-change="handleFileChange"
                             >
                                 <el-icon></el-icon>

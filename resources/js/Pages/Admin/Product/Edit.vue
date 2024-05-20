@@ -7,6 +7,7 @@ import { ref, watch } from "vue";
 const { categories } = usePage().props;
 const { brands } = usePage().props;
 
+// Props
 const props = defineProps({
     product: {
         type: Object,
@@ -17,7 +18,6 @@ const props = defineProps({
     },
 });
 
-
 // Form
 const formm = useForm({
     name: props.product?.name || "",
@@ -26,14 +26,13 @@ const formm = useForm({
     price: props.product?.price || "",
     category_id: props.product?.category_id || "",
     brand_id: props.product?.brand_id || "",
-    imagesView: props.product?.images || [],
+    imagesView: [],
     images: [],
     quantity: props.product?.quantity || "",
     published: props.product?.published ?? true,
     in_stock: props.product?.in_stock ?? true,
     errors: {},
 });
-
 
 // formm reset after prop change
 watch(() => {
@@ -44,7 +43,7 @@ watch(() => {
         formm.price = props.product.price;
         formm.category_id = props.product.category_id;
         formm.brand_id = props.product.brand_id;
-        formm.imagesView = props.product.images;
+        formm.imagesView = [];
         formm.quantity = props.product.quantity;
         formm.published = props.product.published;
         formm.in_stock = props.product.in_stock;
@@ -69,34 +68,35 @@ const handleFileChange = (file) => {
     formm.images = formm.imagesView.map((file) => file.raw);
 };
 
-const handleFileRemove = (file) => {
-    console.log(file);
-};
 
 // Update Product
 const FormSubmited = ref(false);
 const updateProduct = async () => {
     try {
-        await router.post("/admin/products/" + props.product.id + "/update", formm, {
-            preserveScroll: true,
-            onSuccess: () => {
-                formm.reset();
-                formm.errors = {};
-                document.getElementById("defaultModalEdit").click();
-                props.refreshProducts();
-                FormSubmited.value = true;
-                setTimeout(() => {
-                    FormSubmited.value = false;
-                }, 3000);
-            },
-            onError: (error) => {
-                formm.errors = error || {};
-                console.log(error);
-            },
-        });
+        await router.post(
+            "/admin/products/" + props.product.id + "/update",
+            formm,
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    formm.reset();
+                    formm.errors = {};
+                    document.getElementById("defaultModalEdit").click();
+                    props.refreshProducts();
+                    FormSubmited.value = true;
+                    setTimeout(() => {
+                        FormSubmited.value = false;
+                    }, 3000);
+                },
+                onError: (error) => {
+                    formm.errors = error || {};
+                    console.log(error);
+                },
+            }
+        );
     } catch (error) {
         console.log(error);
-        document.getElementById("defaultModal").click();
+        document.getElementById("defaultModalEdit").click();
     }
 };
 
@@ -279,7 +279,10 @@ watch(
         aria-hidden="true"
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
     >
-        <div v-if="product" class="relative p-4 w-full max-w-2xl h-full md:h-auto">
+        <div
+            v-if="product"
+            class="relative p-4 w-full max-w-2xl h-full md:h-auto"
+        >
             <!-- Modal content -->
             <div
                 class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5"
@@ -572,6 +575,7 @@ watch(
                             </p>
                         </label>
                         <div class="sm:col-span-2">
+                            <!-- Upload images -->
                             <label
                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                 for="multiple_files"
@@ -582,13 +586,45 @@ watch(
                                 v-model:file-list="formm.imagesView"
                                 multiple
                                 list-type="picture-card"
-                                :on-remove="handleFileRemove"
                                 :on-change="handleFileChange"
                             >
-                                <img v-if="formm.images" :src="formm.images" alt="">
                                 <el-icon></el-icon>
                             </el-upload>
-
+                            <!-- End upload images -->
+                            <!-- list of images for selected product -->
+                            <div class="sm:col-span-2 my-8">
+                                <label
+                                    class="block mb-2 text font-medium text-gray-900 dark:text-white"
+                                    for="multiple_files"
+                                    >Images List
+                                </label>
+                                <div class="flex flex-nowrap">
+                                    <div
+                                        v-for="(
+                                            image, index
+                                        ) in product.images"
+                                        :key="image.id"
+                                        class="relative w-40 h-32 bg-slate-300 rounded"
+                                    >
+                                        <img
+                                            class="w-40 h-32 rounded object-contain"
+                                            :src="`/storage/${image.image}`"
+                                        />
+                                        <span
+                                            class="absolute top-0 right-8 transform -translate-y-1/2 w-6 h-6 bg-red-400 border-2 border-white dark:border-gray-800 rounded-full"
+                                        >
+                                            <span
+                                                @click="
+                                                    deleteImage(image, index)
+                                                "
+                                                class="text-white text-s font-bold absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+                                                >x</span
+                                            >
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end -->
                             <p
                                 v-if="formm.errors.images"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"

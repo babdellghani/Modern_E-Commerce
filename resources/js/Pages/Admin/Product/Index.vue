@@ -133,8 +133,9 @@ const openEditModal = (id) => {
                                     </th>
                                     <th scope="col" class="px-4 py-3">Brand</th>
                                     <th scope="col" class="px-4 py-3">Stock</th>
+                                    <th scope="col" class="px-4 py-3">In Stock</th>
                                     <th scope="col" class="px-4 py-3">
-                                        Status
+                                        Published
                                     </th>
                                     <th scope="col" class="px-4 py-3">Price</th>
                                     <th scope="col" class="px-4 py-3">
@@ -185,7 +186,7 @@ const openEditModal = (id) => {
                                     </td>
                                     <td class="px-4 py-2">
                                         <span
-                                            class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-green-900 dark:text-green-300"
+                                            class="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-purple-900 dark:text-purple-300"
                                             >{{ product.brand.name }}</span
                                         >
                                     </td>
@@ -205,6 +206,17 @@ const openEditModal = (id) => {
                                             ></div>
                                             {{ product.quantity }}
                                         </div>
+                                    </td>
+                                    <td class="px-4 py-2">
+                                        <span
+                                            :class="[
+                                                    'text-xs font-medium px-2 py-0.5 rounded',
+                                                     product.in_stock
+                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                                            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+                                                ]"
+                                            >{{ product.in_stock ? 'Yes' : 'No' }}</span
+                                        >
                                     </td>
                                     <td
                                         class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"
