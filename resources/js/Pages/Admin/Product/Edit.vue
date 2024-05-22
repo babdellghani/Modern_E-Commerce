@@ -22,15 +22,16 @@ const props = defineProps({
 const formm = useForm({
     name: props.product?.name || "",
     slug: props.product?.slug || "",
-    description: props.product?.description || "yyy",
+    description: props.product?.description || "",
     price: props.product?.price || "",
     category_id: props.product?.category_id || "",
     brand_id: props.product?.brand_id || "",
     imagesView: [],
+    imagesViewOld: props.product?.images || [],
     images: [],
     quantity: props.product?.quantity || "",
-    published: props.product?.published ?? true,
-    in_stock: props.product?.in_stock ?? true,
+    published: props.product?.published || "",
+    in_stock: props.product?.in_stock || "",
     errors: {},
 });
 
@@ -43,7 +44,7 @@ watch(() => {
         formm.price = props.product.price;
         formm.category_id = props.product.category_id;
         formm.brand_id = props.product.brand_id;
-        formm.imagesView = [];
+        formm.imagesViewOld = props.product.images;
         formm.quantity = props.product.quantity;
         formm.published = props.product.published;
         formm.in_stock = props.product.in_stock;
@@ -68,6 +69,22 @@ const handleFileChange = (file) => {
     formm.images = formm.imagesView.map((file) => file.raw);
 };
 
+// Delete Single Image
+const deleteImage = async (id, index) => {
+    try {
+        await router.delete("/admin/products/" + id + "/image/delete", {
+            preserveScroll: true,
+            onSuccess: () => {
+                formm.imagesViewOld.splice(index, 1);
+            },
+            onError: (error) => {
+                console.error("Failed to delete image:", error);
+            },
+        });
+    } catch (error) {
+        console.error("An error occurred:", error);
+    }
+};
 
 // Update Product
 const FormSubmited = ref(false);
@@ -277,7 +294,7 @@ watch(
         id="defaultModalEdit"
         tabindex="-1"
         aria-hidden="true"
-        class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
+        class="hidden min-w-full overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center !items-start w-full md:inset-0 h-modal md:h-full"
     >
         <div
             v-if="product"
@@ -528,12 +545,35 @@ watch(
                         <label class="inline-flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
-                                value=""
+                                name="in_stock"
+                                id="in_stock"
+                                class="sr-only peer"
+                                :checked="formm.in_stock"
+                                @change="formm.in_stock = !formm.in_stock"
+                            />
+                            <div
+                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                            ></div>
+                            <span
+                                class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                                >In stock</span
+                            >
+                            <p
+                                v-if="formm.errors.in_stock"
+                                class="mt-2 text-sm text-red-600 dark:text-red-500"
+                            >
+                                {{ formm.errors.in_stock }}
+                            </p>
+                        </label>
+
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
                                 name="published"
                                 id="published"
                                 class="sr-only peer"
-                                v-model="formm.published"
                                 :checked="formm.published"
+                                @change="formm.published = !formm.published"
                             />
                             <div
                                 class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
@@ -550,30 +590,6 @@ watch(
                             </p>
                         </label>
 
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                value=""
-                                name="in_stock"
-                                id="in_stock"
-                                v-model="formm.in_stock"
-                                class="sr-only peer"
-                                :checked="formm.in_stock"
-                            />
-                            <div
-                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-                            ></div>
-                            <span
-                                class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-                                >In stock</span
-                            >
-                            <p
-                                v-if="formm.errors.in_stock"
-                                class="mt-2 text-sm text-red-600 dark:text-red-500"
-                            >
-                                {{ formm.errors.in_stock }}
-                            </p>
-                        </label>
                         <div class="sm:col-span-2">
                             <!-- Upload images -->
                             <label
@@ -592,7 +608,10 @@ watch(
                             </el-upload>
                             <!-- End upload images -->
                             <!-- list of images for selected product -->
-                            <div class="sm:col-span-2 my-8">
+                            <div
+                                class="sm:col-span-2 my-8"
+                                v-if="formm.imagesViewOld.length > 0"
+                            >
                                 <label
                                     class="block mb-2 text font-medium text-gray-900 dark:text-white"
                                     for="multiple_files"
@@ -602,9 +621,9 @@ watch(
                                     <div
                                         v-for="(
                                             image, index
-                                        ) in product.images"
+                                        ) in formm.imagesViewOld"
                                         :key="image.id"
-                                        class="relative w-40 h-32 bg-slate-300 rounded"
+                                        class="relative w-40 h-32 bg-slate-300 rounded mr-2"
                                     >
                                         <img
                                             class="w-40 h-32 rounded object-contain"
@@ -615,7 +634,7 @@ watch(
                                         >
                                             <span
                                                 @click="
-                                                    deleteImage(image, index)
+                                                    deleteImage(image.id, index)
                                                 "
                                                 class="text-white text-s font-bold absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
                                                 >x</span

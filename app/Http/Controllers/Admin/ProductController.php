@@ -95,17 +95,6 @@ class ProductController extends Controller
 
         // Upload images
         if ($request->hasFile('images')) {
-
-            // Delete old images
-            $productImageOld = ProductImage::where('product_id', $id)->get();
-            if (count($productImageOld) > 0) {
-                foreach ($productImageOld as $image) {
-                    File::delete(storage_path('app/public/' . $image->image));
-                    $image->delete();
-                }
-            }
-
-            // Upload new images
             $productImage = $request->file('images');
             foreach ($productImage as $image) {
                 $image = $image->store('products', 'public');
@@ -122,6 +111,17 @@ class ProductController extends Controller
 
         // Redirect to index
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully');
+    }
+
+    /**
+     * Delete Single Image
+     */
+    public function deleteImage(string $id)
+    {
+        $image = ProductImage::findOrFail($id);
+        File::delete(storage_path('app/public/' . $image->image));
+        $image->delete();
+        return redirect()->back()->with('success', 'Image deleted successfully');
     }
 
     /**
@@ -143,6 +143,8 @@ class ProductController extends Controller
         // Delete product
         $product->deleted_by = Auth::user()->id;
         $product->delete();
+
+        // Redirect to index
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully');
     }
 }

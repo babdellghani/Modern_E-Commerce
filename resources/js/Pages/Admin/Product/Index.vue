@@ -42,13 +42,12 @@ const ChangePublished = async (id) => {
     }
 };
 
-
 // Edit Product
 const editModalOpen = ref(false);
 const selectedProduct = ref(null);
 
 const openEditModal = (id) => {
-    selectedProduct.value = products.value.find(product => product.id === id);
+    selectedProduct.value = products.value.find((product) => product.id === id);
     editModalOpen.value = true;
 };
 </script>
@@ -133,7 +132,9 @@ const openEditModal = (id) => {
                                     </th>
                                     <th scope="col" class="px-4 py-3">Brand</th>
                                     <th scope="col" class="px-4 py-3">Stock</th>
-                                    <th scope="col" class="px-4 py-3">In Stock</th>
+                                    <th scope="col" class="px-4 py-3">
+                                        In Stock
+                                    </th>
                                     <th scope="col" class="px-4 py-3">
                                         Published
                                     </th>
@@ -172,9 +173,19 @@ const openEditModal = (id) => {
                                         class="flex items-center px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                                     >
                                         <img
-                                            src="https://flowbite.s3.amazonaws.com/blocks/application-ui/products/imac-front-image.png"
-                                            alt="iMac Front Image"
-                                            class="w-auto h-8 mr-3"
+                                            v-if="
+                                                product.images &&
+                                                product.images.length > 0
+                                            "
+                                            :src="`/storage/${product.images[0].image}`"
+                                            :alt="product.name"
+                                            class="w-8 h-8 mr-3 rounded-md object-contain"
+                                        />
+                                        <img
+                                            v-else
+                                            src="https://via.placeholder.com/150"
+                                            :alt="product.name"
+                                            class="w-8 h-8 mr-3 rounded-md object-contain"
                                         />
                                         <span>{{ product.name }} </span>
                                     </th>
@@ -210,12 +221,14 @@ const openEditModal = (id) => {
                                     <td class="px-4 py-2">
                                         <span
                                             :class="[
-                                                    'text-xs font-medium px-2 py-0.5 rounded',
-                                                     product.in_stock
-                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                                            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-                                                ]"
-                                            >{{ product.in_stock ? 'Yes' : 'No' }}</span
+                                                'text-xs font-medium px-2 py-0.5 rounded',
+                                                product.in_stock
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+                                            ]"
+                                            >{{
+                                                product.in_stock ? "Yes" : "No"
+                                            }}</span
                                         >
                                     </td>
                                     <td
@@ -309,7 +322,11 @@ const openEditModal = (id) => {
                                             </ul>
                                             <div class="py-1">
                                                 <a
-                                                    href="#"
+                                                    @click="
+                                                        deleteProduct(
+                                                            product.id
+                                                        )
+                                                    "
                                                     class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
                                                     >Delete</a
                                                 >
