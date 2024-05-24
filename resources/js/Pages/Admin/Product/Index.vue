@@ -50,6 +50,25 @@ const openEditModal = (id) => {
     selectedProduct.value = products.value.find((product) => product.id === id);
     editModalOpen.value = true;
 };
+
+// Delete Product
+const deleteProduct = async (id) => {
+    try {
+        await router.delete("/admin/products/" + id + "/destroy", {
+            preserveScroll: true,
+            onSuccess: () => {
+                products.value = products.value.filter(
+                    (product) => product.id !== id
+                );
+            },
+            onError: (error) => {
+                console.log(error);
+            },
+        });
+    } catch (error) {
+        console.log(error);
+    }
+};
 </script>
 
 <template>
@@ -300,7 +319,35 @@ const openEditModal = (id) => {
                                                     <a
                                                         href="#"
                                                         class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                        >Show</a
+                                                        ><span
+                                                            class="flex justify-start items-center gap-2"
+                                                        >
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                width="16"
+                                                                height="16"
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                stroke-width="2"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                class="lucide lucide-external-link"
+                                                            >
+                                                                <path
+                                                                    d="M15 3h6v6"
+                                                                />
+                                                                <path
+                                                                    d="M10 14 21 3"
+                                                                />
+                                                                <path
+                                                                    d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                                                                />
+                                                            </svg>
+                                                            <span
+                                                                >Show</span
+                                                            ></span
+                                                        ></a
                                                     >
                                                 </li>
                                                 <li>
@@ -316,8 +363,34 @@ const openEditModal = (id) => {
                                                                 product.id
                                                             )
                                                         "
-                                                        >Edit</a
                                                     >
+                                                        <span
+                                                            class="flex justify-start items-center gap-2"
+                                                        >
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                width="16"
+                                                                height="16"
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                stroke-width="2"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                class="lucide lucide-pencil"
+                                                            >
+                                                                <path
+                                                                    d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+                                                                />
+                                                                <path
+                                                                    d="m15 5 4 4"
+                                                                />
+                                                            </svg>
+                                                            <span
+                                                                >Edit</span
+                                                            ></span
+                                                        >
+                                                    </a>
                                                 </li>
                                             </ul>
                                             <div class="py-1">
@@ -327,9 +400,36 @@ const openEditModal = (id) => {
                                                             product.id
                                                         )
                                                     "
-                                                    class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                                                    >Delete</a
+                                                    class="block py-2 px-4 text-sm text-red-700 hover:bg-red-100 dark:hover:bg-red-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
                                                 >
+                                                    <span
+                                                        class="flex justify-start items-center gap-2"
+                                                    >
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            width="16"
+                                                            height="16"
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            stroke-width="2"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            class="lucide lucide-trash"
+                                                        >
+                                                            <path d="M3 6h18" />
+                                                            <path
+                                                                d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"
+                                                            />
+                                                            <path
+                                                                d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"
+                                                            />
+                                                        </svg>
+                                                        <span
+                                                            >Delete</span
+                                                        ></span
+                                                    >
+                                                </a>
                                             </div>
                                         </div>
                                     </td>
