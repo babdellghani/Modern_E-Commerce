@@ -1,7 +1,7 @@
 <script setup>
-import { router, useForm } from "@inertiajs/vue3";
-import { usePage } from "@inertiajs/vue3";
+import { router, useForm, usePage } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
+import { Plus } from '@element-plus/icons-vue'
 
 // Variables
 const { categories } = usePage().props;
@@ -561,7 +561,7 @@ watch(
                                 list-type="picture-card"
                                 :on-change="handleFileChange"
                             >
-                                <el-icon></el-icon>
+                                <el-icon><Plus /></el-icon>
                             </el-upload>
                             
                             <p

@@ -1,7 +1,7 @@
 <script setup>
-import { router, useForm } from "@inertiajs/vue3";
-import { usePage } from "@inertiajs/vue3";
+import { router, useForm, usePage } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
+import { Plus } from '@element-plus/icons-vue'
 
 // Variables
 const { categories } = usePage().props;
@@ -36,20 +36,20 @@ const formm = useForm({
 });
 
 // formm reset after prop change
-watch(() => {
-    if (props.product) {
-        formm.name = props.product.name;
-        formm.slug = props.product.slug;
-        formm.description = props.product.description;
-        formm.price = props.product.price;
-        formm.category_id = props.product.category_id;
-        formm.brand_id = props.product.brand_id;
-        formm.imagesViewOld = props.product.images;
-        formm.quantity = props.product.quantity;
-        formm.published = props.product.published;
-        formm.in_stock = props.product.in_stock;
+watch(() => props.product, (newProduct) => {
+    if (newProduct) {
+        formm.name = newProduct.name;
+        formm.slug = newProduct.slug;
+        formm.description = newProduct.description;
+        formm.price = newProduct.price;
+        formm.category_id = newProduct.category_id;
+        formm.brand_id = newProduct.brand_id;
+        formm.imagesViewOld = newProduct.images;
+        formm.quantity = newProduct.quantity;
+        formm.published = newProduct.published;
+        formm.in_stock = newProduct.in_stock;
     }
-});
+}, { deep: true });
 
 // Slug
 watch(
@@ -90,7 +90,7 @@ const deleteImage = async (id, index) => {
 const FormSubmited = ref(false);
 const updateProduct = async () => {
     try {
-        await router.post(
+        await router.put(
             "/admin/products/" + props.product.id + "/update",
             formm,
             {
@@ -316,7 +316,7 @@ watch(
                     <button
                         type="button"
                         class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                        data-modal-toggle="defaultModal"
+                        data-modal-toggle="defaultModalEdit"
                     >
                         <svg
                             aria-hidden="true"
@@ -604,7 +604,7 @@ watch(
                                 list-type="picture-card"
                                 :on-change="handleFileChange"
                             >
-                                <el-icon></el-icon>
+                                <el-icon><Plus /></el-icon>
                             </el-upload>
                             <!-- End upload images -->
                             <!-- list of images for selected product -->
@@ -617,16 +617,16 @@ watch(
                                     for="multiple_files"
                                     >Images List
                                 </label>
-                                <div class="flex flex-nowrap">
+                                <div class="flex flex-wrap justify-center">
                                     <div
                                         v-for="(
                                             image, index
                                         ) in formm.imagesViewOld"
                                         :key="image.id"
-                                        class="relative w-40 h-32 bg-slate-300 rounded mr-2"
+                                        class="relative w-32 h-32 bg-slate-300 rounded mr-4 mt-2"
                                     >
                                         <img
-                                            class="w-40 h-32 rounded object-contain"
+                                            class="w-32 h-32 rounded object-contain"
                                             :src="`/storage/${image.image}`"
                                         />
                                         <span
