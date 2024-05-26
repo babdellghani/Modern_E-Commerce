@@ -1,15 +1,13 @@
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
+import UserLayout from '@/Pages/User/Layouts/UserLayout.vue';
 import Welcome from '@/Components/Welcome.vue';
 </script>
 
 <template>
-    <AppLayout title="Dashboard">
-        <template #header>
+    <UserLayout title="Dashboard">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Dashboard
             </h2>
-        </template>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -18,5 +16,5 @@ import Welcome from '@/Components/Welcome.vue';
                 </div>
             </div>
         </div>
-    </AppLayout>
+    </UserLayout>
 </template>
