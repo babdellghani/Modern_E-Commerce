@@ -144,7 +144,7 @@ import { Link } from "@inertiajs/vue3";
 
                     <div
                         id="myCartDropdown1"
-                        class="hidden z-10 mx-auto max-w-sm space-y-4 overflow-hidden rounded-lg bg-white p-4 antialiased shadow-lg dark:bg-gray-800"
+                        class="hidden z-50 mx-auto max-w-sm space-y-4 overflow-hidden rounded-lg bg-white p-4 antialiased shadow-lg dark:bg-gray-800"
                     >
                         <div class="grid grid-cols-2">
                             <div>
@@ -314,7 +314,7 @@ import { Link } from "@inertiajs/vue3";
                     <div
                         v-if="$page.props.auth.user"
                         id="userDropdown1"
-                        class="hidden z-10 w-56 divide-y divide-gray-100 overflow-hidden overflow-y-auto rounded-lg bg-white antialiased shadow dark:divide-gray-600 dark:bg-gray-700"
+                        class="hidden z-50 w-56 divide-y divide-gray-100 overflow-hidden overflow-y-auto rounded-lg bg-white antialiased shadow dark:divide-gray-600 dark:bg-gray-700"
                     >
                         <ul
                             class="p-2 text-start text-sm font-medium text-gray-900 dark:text-white"
