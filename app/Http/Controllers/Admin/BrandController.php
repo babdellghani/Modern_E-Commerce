@@ -6,6 +6,7 @@ use App\Models\Brand;
 use Illuminate\Http\Request;
 use App\Http\Requests\BrandRequest;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
 
 class BrandController extends Controller
 {
@@ -31,6 +32,9 @@ class BrandController extends Controller
     public function store(BrandRequest $request)
     {
         $brandData = $request->validated();
+        if ($request->hasFile('image')) {
+            $brandData['image'] = $request->file('image')->store('brands', 'public');
+        }
         Brand::create($brandData);
         return redirect()->route('admin.brands.index')->with('success', 'Brand created successfully');
     }
@@ -58,6 +62,10 @@ class BrandController extends Controller
     {
         $brandData = $request->validated();
         $brand = Brand::findOrFail($id);
+        if ($request->hasFile('image')) {
+            $brandData['image'] = $request->file('image')->store('brands', 'public');
+            File::delete(storage_path('app/public/' . $brand->image));
+        }
         $brand->update($brandData);
         return redirect()->route('admin.brands.index')->with('success', 'Brand updated successfully');
     }
@@ -68,6 +76,7 @@ class BrandController extends Controller
     public function destroy(string $id)
     {
         $brand = Brand::findOrFail($id);
+        File::delete(storage_path('app/public/' . $brand->image));
         $brand->delete();
         return redirect()->route('admin.brands.index')->with('success', 'Brand deleted successfully');
     }
