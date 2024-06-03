@@ -2,7 +2,7 @@
 import AdminLayout from "@/Pages/Admin/Layouts/AdminLayout.vue";
 import { router, usePage } from "@inertiajs/vue3";
 import Create from "./Create.vue";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import Edit from "./Edit.vue";
 
 const productsPage = computed(() => usePage().props.products);
@@ -15,10 +15,10 @@ const refreshProducts = () => {
 
 // Pagination
 const changePage = (page) => {
-  router.visit(`/admin/products?page=${page}`, {
-    preserveState: false,
-    preserveScroll: true,
-  });
+    router.visit(`/admin/products?page=${page}`, {
+        preserveState: false,
+        preserveScroll: true,
+    });
 };
 
 // Change Published
@@ -79,7 +79,49 @@ const deleteProduct = async (id) => {
     }
 };
 
+// Delete Multiple Products
+const selectedProducts = ref([]);
+const selectAll = ref(false);
 
+const toggleAllCheckboxes = () => {
+    if (selectAll.value) {
+        selectedProducts.value = products.value.map((product) => product.id);
+    } else {
+        selectedProducts.value = [];
+    }
+};
+
+const deleteAll = async () => {
+    if (selectedProducts.value.length > 0) {
+        try {
+            await router.delete(
+                "/admin/products/" +
+                    selectedProducts.value +
+                    "/multiple/delete",
+                {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        products.value = products.value.filter(
+                            (product) =>
+                                !selectedProducts.value.includes(product.id)
+                        );
+                        selectedProducts.value = [];
+                        selectAll.value = false;
+                    },
+                    onError: (error) => {
+                        console.log(error);
+                    },
+                }
+            );
+        } catch (error) {
+            console.log(error);
+        }
+    }
+};
+
+watch(selectedProducts, () => {
+    selectAll.value = selectedProducts.value.length === products.value.length;
+});
 </script>
 
 <template>
@@ -105,7 +147,7 @@ const deleteProduct = async (id) => {
                         class="flex flex-col px-4 py-3 space-y-3 lg:flex-row lg:items-center lg:justify-between lg:space-y-0 lg:space-x-4"
                     >
                         <div
-                            class="flex flex-col flex-shrink-0 space-y-3 md:flex-row md:items-center lg:justify-end md:space-y-0 md:space-x-3"
+                            class="flex w-full flex-col flex-shrink-0 space-y-3 md:flex-row md:items-center lg:justify-between md:space-y-0 md:space-x-3"
                         >
                             <!-- Modal toggle -->
                             <button
@@ -130,6 +172,36 @@ const deleteProduct = async (id) => {
                                 </svg>
                                 Add new product
                             </button>
+                            <button
+                                type="button"
+                                @click="deleteAll"
+                                v-if="selectedProducts.length > 0"
+                                class="flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-lg bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="lucide lucide-trash-2 h-5 w-5 mr-2"
+                                >
+                                    <path d="M3 6h18" />
+                                    <path
+                                        d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"
+                                    />
+                                    <path
+                                        d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"
+                                    />
+                                    <line x1="10" x2="10" y1="11" y2="17" />
+                                    <line x1="14" x2="14" y1="11" y2="17" />
+                                </svg>
+                                Delete
+                            </button>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -145,6 +217,8 @@ const deleteProduct = async (id) => {
                                             <input
                                                 id="checkbox-all"
                                                 type="checkbox"
+                                                v-model="selectAll"
+                                                @change="toggleAllCheckboxes"
                                                 class="w-4 h-4 bg-gray-100 border-gray-300 rounded text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                             />
                                             <label
@@ -188,6 +262,8 @@ const deleteProduct = async (id) => {
                                             <input
                                                 :id="`checkbox-table-search-${product.id}`"
                                                 type="checkbox"
+                                                v-model="selectedProducts"
+                                                :value="product.id"
                                                 onclick="event.stopPropagation()"
                                                 class="w-4 h-4 bg-gray-100 border-gray-300 rounded text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                             />
@@ -198,27 +274,31 @@ const deleteProduct = async (id) => {
                                             >
                                         </div>
                                     </td>
-                                    <th
+                                    <td
                                         scope="row"
-                                        class="flex items-center px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                        class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                                     >
-                                        <img
-                                            v-if="
-                                                product.images &&
-                                                product.images.length > 0
-                                            "
-                                            :src="`/storage/${product.images[0].image}`"
-                                            :alt="product.name"
-                                            class="w-8 h-8 mr-3 rounded-md object-contain"
-                                        />
-                                        <img
-                                            v-else
-                                            src="https://via.placeholder.com/150"
-                                            :alt="product.name"
-                                            class="w-8 h-8 mr-3 rounded-md object-contain"
-                                        />
-                                        <span>{{ product.name }} </span>
-                                    </th>
+                                        <div
+                                            class="flex items-center whitespace-nowrap"
+                                        >
+                                            <img
+                                                v-if="
+                                                    product.images &&
+                                                    product.images.length > 0
+                                                "
+                                                :src="`/storage/${product.images[0].image}`"
+                                                :alt="product.name"
+                                                class="w-8 h-8 mr-3 rounded-md object-contain"
+                                            />
+                                            <img
+                                                v-else
+                                                src="https://via.placeholder.com/150"
+                                                :alt="product.name"
+                                                class="w-8 h-8 mr-3 rounded-md object-contain"
+                                            />
+                                            <span>{{ product.name }} </span>
+                                        </div>
+                                    </td>
                                     <td class="px-4 py-2">
                                         <span
                                             class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
@@ -295,85 +375,124 @@ const deleteProduct = async (id) => {
                                     <td
                                         class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                                     >
-                                        {{ product.updated_at.slice(0, 10) }}
+                                        {{ product.updated_at.split("T")[0] }}
                                     </td>
-                                    <td
-                                        class="px-4 py-3 flex items-center justify-end"
-                                    >
-                                        <button
-                                            :id="`${product.id}-dropdown-button`"
-                                            :data-dropdown-toggle="`${product.id}-dropdown`"
-                                            class="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100"
-                                            type="button"
-                                        >
-                                            <svg
-                                                class="w-5 h-5"
-                                                aria-hidden="true"
-                                                fill="currentColor"
-                                                viewbox="0 0 20 20"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <path
-                                                    d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"
-                                                />
-                                            </svg>
-                                        </button>
+                                    <td class="px-4 py-3">
                                         <div
-                                            :id="`${product.id}-dropdown`"
-                                            class="hidden z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600"
+                                            class="flex items-center justify-end"
                                         >
-                                            <ul
-                                                class="py-1 text-sm text-gray-700 dark:text-gray-200"
-                                                :aria-labelledby="`${product.id}-dropdown-button`"
+                                            <button
+                                                :id="`${product.id}-dropdown-button`"
+                                                :data-dropdown-toggle="`${product.id}-dropdown`"
+                                                class="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100"
+                                                type="button"
                                             >
-                                                <li>
-                                                    <a
-                                                        href="#"
-                                                        class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                        ><span
-                                                            class="flex justify-start items-center gap-2"
-                                                        >
-                                                            <svg
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                width="16"
-                                                                height="16"
-                                                                viewBox="0 0 24 24"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                stroke-width="2"
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                class="lucide lucide-external-link"
+                                                <svg
+                                                    class="w-5 h-5"
+                                                    aria-hidden="true"
+                                                    fill="currentColor"
+                                                    viewbox="0 0 20 20"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                >
+                                                    <path
+                                                        d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"
+                                                    />
+                                                </svg>
+                                            </button>
+                                            <div
+                                                :id="`${product.id}-dropdown`"
+                                                class="hidden z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600"
+                                            >
+                                                <ul
+                                                    class="py-1 text-sm text-gray-700 dark:text-gray-200"
+                                                    :aria-labelledby="`${product.id}-dropdown-button`"
+                                                >
+                                                    <li>
+                                                        <a
+                                                            href="#"
+                                                            class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                            ><span
+                                                                class="flex justify-start items-center gap-2"
                                                             >
-                                                                <path
-                                                                    d="M15 3h6v6"
-                                                                />
-                                                                <path
-                                                                    d="M10 14 21 3"
-                                                                />
-                                                                <path
-                                                                    d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                                                                />
-                                                            </svg>
+                                                                <svg
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    width="16"
+                                                                    height="16"
+                                                                    viewBox="0 0 24 24"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    stroke-width="2"
+                                                                    stroke-linecap="round"
+                                                                    stroke-linejoin="round"
+                                                                    class="lucide lucide-external-link"
+                                                                >
+                                                                    <path
+                                                                        d="M15 3h6v6"
+                                                                    />
+                                                                    <path
+                                                                        d="M10 14 21 3"
+                                                                    />
+                                                                    <path
+                                                                        d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                                                                    />
+                                                                </svg>
+                                                                <span
+                                                                    >Show</span
+                                                                ></span
+                                                            ></a
+                                                        >
+                                                    </li>
+                                                    <li>
+                                                        <!-- Modal toggle -->
+                                                        <a
+                                                            type="button"
+                                                            id="defaultModalButtonEdit"
+                                                            data-modal-target="defaultModalEdit"
+                                                            data-modal-toggle="defaultModalEdit"
+                                                            class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer"
+                                                            @click="
+                                                                openEditModal(
+                                                                    product.id
+                                                                )
+                                                            "
+                                                        >
                                                             <span
-                                                                >Show</span
-                                                            ></span
-                                                        ></a
-                                                    >
-                                                </li>
-                                                <li>
-                                                    <!-- Modal toggle -->
+                                                                class="flex justify-start items-center gap-2"
+                                                            >
+                                                                <svg
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    width="16"
+                                                                    height="16"
+                                                                    viewBox="0 0 24 24"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    stroke-width="2"
+                                                                    stroke-linecap="round"
+                                                                    stroke-linejoin="round"
+                                                                    class="lucide lucide-pencil"
+                                                                >
+                                                                    <path
+                                                                        d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+                                                                    />
+                                                                    <path
+                                                                        d="m15 5 4 4"
+                                                                    />
+                                                                </svg>
+                                                                <span
+                                                                    >Edit</span
+                                                                ></span
+                                                            >
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                                <div class="py-1">
                                                     <a
-                                                        type="button"
-                                                        id="defaultModalButtonEdit"
-                                                        data-modal-target="defaultModalEdit"
-                                                        data-modal-toggle="defaultModalEdit"
-                                                        class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer"
                                                         @click="
-                                                            openEditModal(
+                                                            deleteProduct(
                                                                 product.id
                                                             )
                                                         "
+                                                        class="block py-2 px-4 text-sm text-red-700 hover:bg-red-100 dark:hover:bg-red-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
                                                     >
                                                         <span
                                                             class="flex justify-start items-center gap-2"
@@ -388,59 +507,24 @@ const deleteProduct = async (id) => {
                                                                 stroke-width="2"
                                                                 stroke-linecap="round"
                                                                 stroke-linejoin="round"
-                                                                class="lucide lucide-pencil"
+                                                                class="lucide lucide-trash"
                                                             >
                                                                 <path
-                                                                    d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+                                                                    d="M3 6h18"
                                                                 />
                                                                 <path
-                                                                    d="m15 5 4 4"
+                                                                    d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"
+                                                                />
+                                                                <path
+                                                                    d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"
                                                                 />
                                                             </svg>
                                                             <span
-                                                                >Edit</span
+                                                                >Delete</span
                                                             ></span
                                                         >
                                                     </a>
-                                                </li>
-                                            </ul>
-                                            <div class="py-1">
-                                                <a
-                                                    @click="
-                                                        deleteProduct(
-                                                            product.id
-                                                        )
-                                                    "
-                                                    class="block py-2 px-4 text-sm text-red-700 hover:bg-red-100 dark:hover:bg-red-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
-                                                >
-                                                    <span
-                                                        class="flex justify-start items-center gap-2"
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            width="16"
-                                                            height="16"
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            stroke-width="2"
-                                                            stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            class="lucide lucide-trash"
-                                                        >
-                                                            <path d="M3 6h18" />
-                                                            <path
-                                                                d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"
-                                                            />
-                                                            <path
-                                                                d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"
-                                                            />
-                                                        </svg>
-                                                        <span
-                                                            >Delete</span
-                                                        ></span
-                                                    >
-                                                </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
@@ -448,105 +532,8 @@ const deleteProduct = async (id) => {
                             </tbody>
                         </table>
                     </div>
-                    <!-- <nav
-                        class="flex flex-col items-start justify-between p-4 space-y-3 md:flex-row md:items-center md:space-y-0"
-                        aria-label="Table navigation"
-                    >
-                        <span
-                            class="text-sm font-normal text-gray-500 dark:text-gray-400"
-                        >
-                            Showing
-                            <span
-                                class="font-semibold text-gray-900 dark:text-white"
-                                >1-10</span
-                            >
-                            of
-                            <span
-                                class="font-semibold text-gray-900 dark:text-white"
-                                >1000</span
-                            >
-                        </span>
-                        <ul class="inline-flex items-stretch -space-x-px">
-                            <li>
-                                <a
-                                    href="#"
-                                    class="flex items-center justify-center h-full py-1.5 px-3 ml-0 text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                                >
-                                    <span class="sr-only">Previous</span>
-                                    <svg
-                                        class="w-5 h-5"
-                                        aria-hidden="true"
-                                        fill="currentColor"
-                                        viewbox="0 0 20 20"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            fill-rule="evenodd"
-                                            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                                            clip-rule="evenodd"
-                                        />
-                                    </svg>
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="flex items-center justify-center px-3 py-2 text-sm leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                                    >1</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="flex items-center justify-center px-3 py-2 text-sm leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                                    >2</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    aria-current="page"
-                                    class="z-10 flex items-center justify-center px-3 py-2 text-sm leading-tight border text-blue-600 bg-blue-50 border-blue-300 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white"
-                                    >3</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="flex items-center justify-center px-3 py-2 text-sm leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                                    >...</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="flex items-center justify-center px-3 py-2 text-sm leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                                    >100</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="flex items-center justify-center h-full py-1.5 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                                >
-                                    <span class="sr-only">Next</span>
-                                    <svg
-                                        class="w-5 h-5"
-                                        aria-hidden="true"
-                                        fill="currentColor"
-                                        viewbox="0 0 20 20"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            fill-rule="evenodd"
-                                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                            clip-rule="evenodd"
-                                        />
-                                    </svg>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav> -->
+
+                    <!-- Pagination -->
                     <nav
                         class="flex flex-col items-start justify-between p-4 space-y-3 md:flex-row md:items-center md:space-y-0"
                         aria-label="Table navigation"
@@ -574,12 +561,16 @@ const deleteProduct = async (id) => {
                             <li>
                                 <a
                                     @click="
-                                        changePage(productsPage.current_page - 1)
+                                        productsPage.current_page !== 1
+                                            ? changePage(
+                                                  productsPage.current_page - 1
+                                              )
+                                            : null
                                     "
                                     :class="[
-                                        'flex items-center justify-center h-full py-1.5 px-3 ml-0 text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white',
+                                        'cursor-pointer flex items-center justify-center h-full py-1.5 px-3 ml-0 text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white',
                                         {
-                                            'cursor-not-allowed opacity-50':
+                                            '!cursor-not-allowed opacity-50':
                                                 productsPage.current_page === 1,
                                         },
                                     ]"
@@ -603,11 +594,14 @@ const deleteProduct = async (id) => {
                                     </svg>
                                 </a>
                             </li>
-                            <li v-for="page in productsPage.last_page" :key="page">
+                            <li
+                                v-for="page in productsPage.last_page"
+                                :key="page"
+                            >
                                 <a
                                     @click="changePage(page)"
                                     :class="[
-                                        'flex items-center justify-center px-3 py-2 text-sm leading-tight border',
+                                        'cursor-pointer flex items-center justify-center px-3 py-2 text-sm leading-tight border',
                                         productsPage.current_page === page
                                             ? 'z-10 text-blue-600 bg-blue-50 border-blue-300 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white'
                                             : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white',
@@ -619,12 +613,17 @@ const deleteProduct = async (id) => {
                             <li>
                                 <a
                                     @click="
-                                        changePage(productsPage.current_page + 1)
+                                        productsPage.current_page !==
+                                        productsPage.last_page
+                                            ? changePage(
+                                                  productsPage.current_page + 1
+                                              )
+                                            : null
                                     "
                                     :class="[
-                                        'flex items-center justify-center h-full py-1.5 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white',
+                                        'cursor-pointer flex items-center justify-center h-full py-1.5 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white',
                                         {
-                                            'cursor-not-allowed opacity-50':
+                                            '!cursor-not-allowed opacity-50':
                                                 productsPage.current_page ===
                                                 productsPage.last_page,
                                         },

@@ -30,4 +30,5 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::put('/products/{product}/update', [ProductController::class, 'update'])->name('admin.products.update');
     Route::delete('/products/{product}/image/delete', [ProductController::class, 'deleteImage'])->name('admin.products.image.delete');
     Route::delete('/products/{product}/destroy', [ProductController::class, 'destroy'])->name('admin.products.destroy');
+    Route::delete('/products/{product}/multiple/delete', [ProductController::class, 'deleteMultiple'])->name('admin.products.delete.multiple');
 });

@@ -147,4 +147,29 @@ class ProductController extends Controller
         // Redirect to index
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully');
     }
+
+    /**
+     * Delete Multiple Images
+     */
+    public function deleteMultiple(string $id)
+    {
+        $products = explode(',', $id);
+        foreach ($products as $id) {
+            $product = Product::findOrFail($id);
+            // Delete images
+            $productImage = ProductImage::where('product_id', $id)->get();
+            if (count($productImage) > 0) {
+                foreach ($productImage as $image) {
+                    File::delete(storage_path('app/public/' . $image->image));
+                    $image->delete();
+                }
+            }
+
+            // Delete product
+            $product->deleted_by = Auth::user()->id;
+            $product->delete();
+        }
+        
+        return redirect()->back()->with('success', 'Products deleted successfully');
+    }
 }
