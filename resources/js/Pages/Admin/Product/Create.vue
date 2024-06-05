@@ -1,7 +1,7 @@
 <script setup>
 import { router, useForm, usePage } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
-import { Plus } from '@element-plus/icons-vue'
+import { Plus } from "@element-plus/icons-vue";
 
 // Variables
 const { categories } = usePage().props;
@@ -20,6 +20,7 @@ const form = useForm({
     quantity: "",
     published: true,
     in_stock: true,
+    oldName: "",
     errors: {},
 });
 
@@ -29,13 +30,6 @@ const handleFileChange = (file) => {
     form.images = form.imagesView.map((file) => file.raw);
 };
 
-// Define Props
-const props = defineProps({
-    refreshProducts: {
-        type: Function,
-        required: true,
-    },
-});
 
 // Add Product
 const FormSubmited = ref(false);
@@ -43,11 +37,11 @@ const AddProduct = async () => {
     try {
         await router.post("/admin/products/store", form, {
             preserveScroll: true,
+            preserveState: true,
             onSuccess: () => {
                 form.reset();
                 form.errors = {};
                 document.getElementById("defaultModal").click();
-                props.refreshProducts();
                 FormSubmited.value = true;
                 setTimeout(() => {
                     FormSubmited.value = false;
@@ -66,16 +60,20 @@ const AddProduct = async () => {
 
 // Slug
 watch(
-    form,
-    () => {
-        form.slug = form.name
-            .toLowerCase()
-            .replace(/ /g, "-")
-            .replace(/[^\w-]+/g, "");
-    },
-    { deep: true }
+    () => form.name,
+    (newValue) => {
+        if (!form.slug || form.slug === slugify(form.oldName)) {
+            form.slug = slugify(newValue);
+        }
+        form.oldName = newValue;
+    }
 );
-
+const slugify = (text) => {
+    return text
+        .toLowerCase()
+        .replace(/ /g, "-")
+        .replace(/[^\w-]+/g, "");
+}
 
 // Watch For Form Changes
 watch(
@@ -358,6 +356,7 @@ watch(
                                 type="number"
                                 name="price"
                                 id="price"
+                                min="0"
                                 v-model="form.price"
                                 step="any"
                                 :class="[
@@ -387,6 +386,7 @@ watch(
                                 type="number"
                                 name="quantity"
                                 id="quantity"
+                                min="0"
                                 v-model="form.quantity"
                                 :class="[
                                     'border text-sm rounded-lg block w-full p-2.5',
@@ -499,55 +499,64 @@ watch(
                             </p>
                         </div>
 
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                value=""
-                                name="in_stock"
-                                id="in_stock"
-                                v-model="form.in_stock"
-                                class="sr-only peer"
-                                checked
-                            />
-                            <div
-                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-                            ></div>
-                            <span
-                                class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-                                >In stock</span
+                        <div>
+                            <label
+                                class="inline-flex items-center cursor-pointer"
                             >
+                                <input
+                                    type="checkbox"
+                                    value=""
+                                    name="in_stock"
+                                    id="in_stock"
+                                    v-model="form.in_stock"
+                                    class="sr-only peer"
+                                    checked
+                                />
+                                <div
+                                    class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                                ></div>
+                                <span
+                                    class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                                    >In stock</span
+                                >
+                            </label>
                             <p
                                 v-if="form.errors.in_stock"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
                                 {{ form.errors.in_stock }}
                             </p>
-                        </label>
+                        </div>
 
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                value=""
-                                name="published"
-                                id="published"
-                                class="sr-only peer"
-                                v-model="form.published"
-                                checked
-                            />
-                            <div
-                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-                            ></div>
-                            <span
-                                class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-                                >Published</span
+                        <div>
+                            <label
+                                class="inline-flex items-center cursor-pointer"
                             >
+                                <input
+                                    type="checkbox"
+                                    value=""
+                                    name="published"
+                                    id="published"
+                                    class="sr-only peer"
+                                    v-model="form.published"
+                                    checked
+                                />
+                                <div
+                                    class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                                ></div>
+                                <span
+                                    class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                                    >Published</span
+                                >
+                            </label>
                             <p
                                 v-if="form.errors.published"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
                                 {{ form.errors.published }}
                             </p>
-                        </label>
+                        </div>
+
                         <div class="sm:col-span-2">
                             <label
                                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -563,7 +572,7 @@ watch(
                             >
                                 <el-icon><Plus /></el-icon>
                             </el-upload>
-                            
+
                             <p
                                 v-if="form.errors.images"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"

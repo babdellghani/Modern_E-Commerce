@@ -36,7 +36,7 @@ class BrandController extends Controller
             $brandData['image'] = $request->file('image')->store('brands', 'public');
         }
         Brand::create($brandData);
-        return redirect()->route('admin.brands.index')->with('success', 'Brand created successfully');
+        return redirect()->back()->with('success', 'Brand created successfully');
     }
 
     /**
@@ -67,7 +67,7 @@ class BrandController extends Controller
             File::delete(storage_path('app/public/' . $brand->image));
         }
         $brand->update($brandData);
-        return redirect()->route('admin.brands.index')->with('success', 'Brand updated successfully');
+        return redirect()->back()->with('success', 'Brand updated successfully');
     }
 
     /**
@@ -78,6 +78,6 @@ class BrandController extends Controller
         $brand = Brand::findOrFail($id);
         File::delete(storage_path('app/public/' . $brand->image));
         $brand->delete();
-        return redirect()->route('admin.brands.index')->with('success', 'Brand deleted successfully');
+        return redirect()->back()->with('success', 'Brand deleted successfully');
     }
 }

@@ -38,8 +38,14 @@ defineProps({
                                 v-if="
                                     product.images && product.images.length > 0
                                 "
-                                class="mx-auto h-full dark:hidden"
-                                :src="product.images[0].image"
+                                class="mx-auto h-full dark:hidden object-cover"
+                                :src="`/storage/${product.images[0].image}`"
+                                :alt="product.name"
+                            />
+                            <img
+                                v-else
+                                class="mx-auto h-full dark:hidden object-cover"
+                                src="https://via.placeholder.com/150"
                                 :alt="product.name"
                             />
                         </a>
@@ -49,6 +55,7 @@ defineProps({
                             class="mb-4 flex items-center justify-between gap-4"
                         >
                             <span
+                                v-if="product.category"
                                 class="me-2 rounded bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-300"
                             >
                                 {{ product.category.name }}

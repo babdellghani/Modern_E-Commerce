@@ -8,10 +8,11 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Requests\ProductRequest;
-use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -61,7 +62,7 @@ class ProductController extends Controller
         }
 
         // Redirect to index
-        return redirect()->route('admin.products.index')->with('success', 'Product created successfully');
+        return redirect()->back()->with('success', 'Product created successfully');
     }
 
     /**
@@ -73,9 +74,9 @@ class ProductController extends Controller
         $product->published = !$product->published;
         $product->save();
         if ($product->published) {
-            return redirect()->route('admin.products.index')->with('success', 'Product published successfully');
+            return redirect()->back()->with('success', 'Product published successfully');
         } else {
-            return redirect()->route('admin.products.index')->with('success', 'Product unpublished successfully');
+            return redirect()->back()->with('success', 'Product unpublished successfully');
         }
     }
 
@@ -110,7 +111,7 @@ class ProductController extends Controller
         $product->update($productData);
 
         // Redirect to index
-        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully');
+        return redirect()->back()->with('success', 'Product updated successfully');
     }
 
     /**
@@ -145,7 +146,7 @@ class ProductController extends Controller
         $product->delete();
 
         // Redirect to index
-        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully');
+        return redirect()->back()->with('success', 'Product deleted successfully');
     }
 
     /**

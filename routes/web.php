@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -31,4 +32,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::delete('/products/{product}/image/delete', [ProductController::class, 'deleteImage'])->name('admin.products.image.delete');
     Route::delete('/products/{product}/destroy', [ProductController::class, 'destroy'])->name('admin.products.destroy');
     Route::delete('/products/{product}/multiple/delete', [ProductController::class, 'deleteMultiple'])->name('admin.products.delete.multiple');
+
+    // Categories
+    Route::get('/categories', [CategoryController::class, 'index'])->name('admin.categories.index');
+    Route::post('/categories/store', [CategoryController::class, 'store'])->name('admin.categories.store');
+    Route::put('/categories/{category}/update', [CategoryController::class, 'update'])->name('admin.categories.update');
+    Route::delete('/categories/{category}/destroy', [CategoryController::class, 'destroy'])->name('admin.categories.destroy');
+    Route::delete('/categories/{category}/multiple/delete', [CategoryController::class, 'deleteMultiple'])->name('admin.categories.delete.multiple');
 });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Inertia\Inertia;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -15,7 +16,10 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        $categories = Category::paginate(10);
+        return Inertia::render('Admin/Category/Index', [
+            'categories' => $categories
+        ]);
     }
 
     /**
@@ -36,7 +40,7 @@ class CategoryController extends Controller
             $categoryData['image'] = $request->file('image')->store('categories', 'public');
         }
         Category::create($categoryData);
-        return redirect()->route('admin.categories.index')->with('success', 'Category created successfully');
+        return redirect()->back()->with('success', 'Category created successfully');
     }
 
     /**
@@ -67,7 +71,7 @@ class CategoryController extends Controller
             File::delete(public_path('storage/' . $category->image));
         }
         $category->update($categoryData);
-        return redirect()->route('admin.categories.index')->with('success', 'Category updated successfully');
+        return redirect()->back()->with('success', 'Category updated successfully');
     }
 
     /**
@@ -78,6 +82,21 @@ class CategoryController extends Controller
         $category = Category::findOrFail($id);
         File::delete(public_path('storage/' . $category->image));
         $category->delete();
-        return redirect()->route('admin.categories.index')->with('success', 'Category deleted successfully');
+        return redirect()->back()->with('success', 'Category deleted successfully');
+    }
+
+    /**
+     * Delete Multiple Images
+     */
+    public function deleteMultiple(string $id)
+    {
+        $categories = explode(',', $id);
+        foreach ($categories as $id) {
+            $categories = Category::findOrFail($id);
+            File::delete(storage_path('app/public/' . $categories->image));
+            $categories->delete();
+        }
+
+        return redirect()->back()->with('success', 'Products deleted successfully');
     }
 }

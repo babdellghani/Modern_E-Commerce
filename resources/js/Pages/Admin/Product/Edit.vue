@@ -1,7 +1,7 @@
 <script setup>
 import { router, useForm, usePage } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
-import { Plus } from '@element-plus/icons-vue'
+import { Plus } from "@element-plus/icons-vue";
 
 // Variables
 const { categories } = usePage().props;
@@ -11,10 +11,6 @@ const { brands } = usePage().props;
 const props = defineProps({
     product: {
         type: Object,
-    },
-    refreshProducts: {
-        type: Function,
-        required: true,
     },
 });
 
@@ -32,36 +28,46 @@ const formm = useForm({
     quantity: props.product?.quantity || "",
     published: props.product?.published || "",
     in_stock: props.product?.in_stock || "",
+    oldName: "",
     errors: {},
 });
 
 // formm reset after prop change
-watch(() => props.product, (newProduct) => {
-    if (newProduct) {
-        formm.name = newProduct.name;
-        formm.slug = newProduct.slug;
-        formm.description = newProduct.description;
-        formm.price = newProduct.price;
-        formm.category_id = newProduct.category_id;
-        formm.brand_id = newProduct.brand_id;
-        formm.imagesViewOld = newProduct.images;
-        formm.quantity = newProduct.quantity;
-        formm.published = newProduct.published;
-        formm.in_stock = newProduct.in_stock;
-    }
-}, { deep: true });
-
-// Slug
 watch(
-    formm,
-    () => {
-        formm.slug = formm.name
-            .toLowerCase()
-            .replace(/ /g, "-")
-            .replace(/[^\w-]+/g, "");
+    () => props.product,
+    (newProduct) => {
+        if (newProduct) {
+            formm.name = newProduct.name;
+            formm.slug = newProduct.slug;
+            formm.description = newProduct.description;
+            formm.price = newProduct.price;
+            formm.category_id = newProduct.category_id;
+            formm.brand_id = newProduct.brand_id;
+            formm.imagesViewOld = newProduct.images;
+            formm.quantity = newProduct.quantity;
+            formm.published = newProduct.published;
+            formm.in_stock = newProduct.in_stock;
+        }
     },
     { deep: true }
 );
+
+// Slug
+watch(
+    () => formm.name,
+    (newValue) => {
+        if (!formm.slug || formm.slug === slugify(formm.oldName)) {
+            formm.slug = slugify(newValue);
+        }
+        formm.oldName = newValue;
+    }
+);
+const slugify = (text) => {
+    return text
+        .toLowerCase()
+        .replace(/ /g, "-")
+        .replace(/[^\w-]+/g, "");
+}
 
 // Image
 const handleFileChange = (file) => {
@@ -90,16 +96,15 @@ const deleteImage = async (id, index) => {
 const FormSubmited = ref(false);
 const updateProduct = async () => {
     try {
-        await router.put(
+        await router.post(
             "/admin/products/" + props.product.id + "/update",
-            formm,
+            { _method: "put", ...formm },
             {
                 preserveScroll: true,
                 onSuccess: () => {
                     formm.reset();
                     formm.errors = {};
                     document.getElementById("defaultModalEdit").click();
-                    props.refreshProducts();
                     FormSubmited.value = true;
                     setTimeout(() => {
                         FormSubmited.value = false;
@@ -107,7 +112,7 @@ const updateProduct = async () => {
                 },
                 onError: (error) => {
                     formm.errors = error || {};
-                    console.log(error);
+                    console.log(formm.errors);
                 },
             }
         );
@@ -335,7 +340,7 @@ watch(
                     </button>
                 </div>
                 <!-- Modal body -->
-                <form @submit.prevent="updateProduct()">
+                <form @submit.prevent="updateProduct()" enctype="multipart/form-data">
                     <div class="grid gap-4 mb-4 sm:grid-cols-2">
                         <div>
                             <label
@@ -402,6 +407,7 @@ watch(
                                 name="price"
                                 id="price"
                                 v-model="formm.price"
+                                min="0"
                                 step="any"
                                 :class="[
                                     'border text-sm rounded-lg block w-full p-2.5',
@@ -430,6 +436,7 @@ watch(
                                 type="number"
                                 name="quantity"
                                 id="quantity"
+                                min="0"
                                 v-model="formm.quantity"
                                 :class="[
                                     'border text-sm rounded-lg block w-full p-2.5',
@@ -542,53 +549,61 @@ watch(
                             </p>
                         </div>
 
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                name="in_stock"
-                                id="in_stock"
-                                class="sr-only peer"
-                                :checked="formm.in_stock"
-                                @change="formm.in_stock = !formm.in_stock"
-                            />
-                            <div
-                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-                            ></div>
-                            <span
-                                class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-                                >In stock</span
+                        <div>
+                            <label
+                                class="inline-flex items-center cursor-pointer"
                             >
+                                <input
+                                    type="checkbox"
+                                    name="in_stock"
+                                    id="in_stock"
+                                    class="sr-only peer"
+                                    :checked="formm.in_stock"
+                                    @change="formm.in_stock = !formm.in_stock"
+                                />
+                                <div
+                                    class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                                ></div>
+                                <span
+                                    class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                                    >In stock</span
+                                >
+                            </label>
                             <p
                                 v-if="formm.errors.in_stock"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
                                 {{ formm.errors.in_stock }}
                             </p>
-                        </label>
+                        </div>
 
-                        <label class="inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                name="published"
-                                id="published"
-                                class="sr-only peer"
-                                :checked="formm.published"
-                                @change="formm.published = !formm.published"
-                            />
-                            <div
-                                class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-                            ></div>
-                            <span
-                                class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
-                                >Published</span
+                        <div>
+                            <label
+                                class="inline-flex items-center cursor-pointer"
                             >
+                                <input
+                                    type="checkbox"
+                                    name="published"
+                                    id="published"
+                                    class="sr-only peer"
+                                    :checked="formm.published"
+                                    @change="formm.published = !formm.published"
+                                />
+                                <div
+                                    class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                                ></div>
+                                <span
+                                    class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                                    >Published</span
+                                >
+                            </label>
                             <p
                                 v-if="formm.errors.published"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
                                 {{ formm.errors.published }}
                             </p>
-                        </label>
+                        </div>
 
                         <div class="sm:col-span-2">
                             <!-- Upload images -->
@@ -648,7 +663,9 @@ watch(
                                 v-if="formm.errors.images"
                                 class="mt-2 text-sm text-red-600 dark:text-red-500"
                             >
-                                {{ formm.errors.images }}
+                                <div v-for="item in formm.errors.images.split(',')">
+                                    {{ item }}
+                                </div>
                             </p>
                         </div>
                     </div>

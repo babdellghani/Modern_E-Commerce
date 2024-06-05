@@ -6,12 +6,8 @@ import { computed, ref, watch } from "vue";
 import Edit from "./Edit.vue";
 
 const productsPage = computed(() => usePage().props.products);
-const products = computed(() => usePage().props.products.data);
+const products = computed(() => productsPage.value.data);
 
-// Refresh products
-const refreshProducts = () => {
-    products.value = usePage().props.products;
-};
 
 // Pagination
 const changePage = (page) => {
@@ -127,14 +123,13 @@ watch(selectedProducts, () => {
 <template>
     <AdminLayout title="Products">
         <!-- Main modal -->
-        <Create :refreshProducts="refreshProducts" />
+        <Create />
 
         <!-- Main modal -->
         <Edit
             v-if="openEditModal"
             :open="editModalOpen"
             :product="selectedProduct"
-            :refreshProducts="refreshProducts"
             @close="editModalOpen = false"
         />
 
@@ -206,7 +201,7 @@ watch(selectedProducts, () => {
                     </div>
                     <div class="overflow-x-auto">
                         <table
-                            class="w-full text-sm text-left text-gray-500 dark:text-gray-400"
+                            class="w-full text-center text-sm text-gray-500 dark:text-gray-400"
                         >
                             <thead
                                 class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
@@ -301,15 +296,21 @@ watch(selectedProducts, () => {
                                     </td>
                                     <td class="px-4 py-2">
                                         <span
+                                            v-if="product.category"
                                             class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
                                             >{{ product.category.name }}</span
                                         >
+                                        <span v-else
+                                            class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-red-900 dark:text-red-300">No Category</span>
                                     </td>
                                     <td class="px-4 py-2">
                                         <span
+                                            v-if="product.brand"
                                             class="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-purple-900 dark:text-purple-300"
                                             >{{ product.brand.name }}</span
                                         >
+                                        <span v-else
+                                            class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-red-900 dark:text-red-300">No Brand</span>
                                     </td>
                                     <td
                                         class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"
@@ -345,7 +346,7 @@ watch(selectedProducts, () => {
                                         class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                                     >
                                         <label
-                                            class="inline-flex items-center me-5 cursor-pointer"
+                                            class="inline-flex items-center cursor-pointer"
                                         >
                                             <form @submit.prevent>
                                                 <input
@@ -527,6 +528,19 @@ watch(selectedProducts, () => {
                                                 </div>
                                             </div>
                                         </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tbody
+                                v-else
+                                class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800"
+                            >
+                                <tr class="text-gray-700 dark:text-gray-400">
+                                    <td
+                                        colspan="4"
+                                        class="px-4 py-3 text-center"
+                                    >
+                                        No products found
                                     </td>
                                 </tr>
                             </tbody>
