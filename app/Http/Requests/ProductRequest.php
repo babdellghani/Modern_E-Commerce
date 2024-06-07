@@ -25,7 +25,7 @@ class ProductRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:200'],
-            'slug' => ['required', 'string', 'max:200', Rule::unique('products')->ignore($this->product)],  
+            'slug' => ['required', 'string', 'max:200','alpha_dash', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('products')->ignore($this->product)],  
             'description' => ['nullable', 'required_if:published,true', 'string'],
             'quantity' => ['required', 'integer', 'gt:0'],
             'price' => ['required', 'numeric', 'gt:0'],

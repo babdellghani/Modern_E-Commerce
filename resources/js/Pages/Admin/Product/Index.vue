@@ -291,7 +291,7 @@ watch(selectedProducts, () => {
                                                 :alt="product.name"
                                                 class="w-8 h-8 mr-3 rounded-md object-contain"
                                             />
-                                            <span>{{ product.name }} </span>
+                                            <span class="truncate">{{ product.name }} </span>
                                         </div>
                                     </td>
                                     <td class="px-4 py-2">

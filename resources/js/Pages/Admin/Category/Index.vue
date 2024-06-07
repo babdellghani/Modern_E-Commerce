@@ -203,7 +203,7 @@ watch(selectedCategories, () => {
                                         Category
                                     </th>
                                     <th scope="col" class="px-4 py-3">
-                                        Slug
+                                        Description
                                     </th>
                                     <th scope="col" class="px-4 py-3">
                                         Last Update
@@ -238,10 +238,10 @@ watch(selectedCategories, () => {
                                     </td>
                                     <td
                                         scope="row"
-                                        class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                        class="px-4 py-2 font-medium text-gray-900  max-w-24 truncate dark:text-white"
                                     >
                                         <div
-                                            class="flex items-center whitespace-nowrap"
+                                            class="flex items-center"
                                         >
                                             <img
                                                 v-if="
@@ -257,11 +257,11 @@ watch(selectedCategories, () => {
                                                 :alt="category.name"
                                                 class="w-8 h-8 mr-3 rounded-md object-contain"
                                             />
-                                            <span>{{ category.name }} </span>
+                                            <span class="truncate">{{ category.name }} </span>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-2">
-                                        {{ category.slug }}
+                                    <td class="px-4 py-2 max-w-24 truncate">
+                                        {{ category.description }}
                                     </td>
                                     <td
                                         class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"

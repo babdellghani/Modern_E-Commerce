@@ -24,7 +24,7 @@ class BrandRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:200'],
-            'slug' => ['required', 'string', 'max:200', Rule::unique('brands')->ignore($this->brand)],
+            'slug' => ['required', 'string', 'max:200','alpha_dash', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('brands')->ignore($this->brand)],
             'description' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ];

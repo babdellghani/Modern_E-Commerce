@@ -77,6 +77,7 @@ const updateCategory = async () => {
                     }, 3000);
                 },
                 onError: (error) => {
+                    formm.errors = error || {};
                     console.log(error);
                 },
             }
@@ -193,6 +194,7 @@ watch(
                         type="button"
                         class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
                         data-modal-toggle="defaultModalEdit"
+                        onclick='document.getElementById("defaultModalEdit").click()'
                     >
                         <svg
                             aria-hidden="true"

@@ -24,7 +24,7 @@ class CategoryRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:200'],
-            'slug' => ['required', 'string', 'max:200', Rule::unique('categories')->ignore($this->category)],
+            'slug' => ['required', 'string', 'max:200', 'alpha_dash', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('categories')->ignore($this->category)],
             'description' => ['nullable', 'string'],
             'image' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:2048'],
         ];
