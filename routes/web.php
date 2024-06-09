@@ -1,10 +1,11 @@
 <?php
 
-use App\Http\Controllers\Admin\CategoryController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\User\HomeController;
+use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\User\UserDashboardController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -39,4 +40,11 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::put('/categories/{category}/update', [CategoryController::class, 'update'])->name('admin.categories.update');
     Route::delete('/categories/{category}/destroy', [CategoryController::class, 'destroy'])->name('admin.categories.destroy');
     Route::delete('/categories/{category}/multiple/delete', [CategoryController::class, 'deleteMultiple'])->name('admin.categories.delete.multiple');
+
+    // Brand
+    Route::get('/brands', [BrandController::class, 'index'])->name('admin.brands.index');
+    Route::post('/brands/store', [BrandController::class, 'store'])->name('admin.brands.store');
+    Route::put('/brands/{brand}/update', [BrandController::class, 'update'])->name('admin.brands.update');
+    Route::delete('/brands/{brand}/destroy', [BrandController::class, 'destroy'])->name('admin.brands.destroy');
+    Route::delete('/brands/{brand}/multiple/delete', [BrandController::class, 'deleteMultiple'])->name('admin.brands.delete.multiple');
 });

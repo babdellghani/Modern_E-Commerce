@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Inertia\Inertia;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use App\Http\Requests\BrandRequest;
@@ -15,7 +16,10 @@ class BrandController extends Controller
      */
     public function index()
     {
-        //
+        $brands = Brand::latest()->paginate(10);
+        return Inertia::render('Admin/Brand/Index', [
+            'brands' => $brands
+        ]);
     }
 
     /**
@@ -79,5 +83,20 @@ class BrandController extends Controller
         File::delete(storage_path('app/public/' . $brand->image));
         $brand->delete();
         return redirect()->back()->with('success', 'Brand deleted successfully');
+    }
+
+    /**
+     * Delete Multiple Images
+     */
+    public function deleteMultiple(string $id)
+    {
+        $brands = explode(',', $id);
+        foreach ($brands as $id) {
+            $brand = Brand::findOrFail($id);
+            File::delete(storage_path('app/public/' . $brand->image));
+            $brand->delete();
+        }
+
+        return redirect()->back()->with('success', 'Products deleted successfully');
     }
 }

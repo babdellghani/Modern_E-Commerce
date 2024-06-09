@@ -16,7 +16,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::paginate(10);
+        $categories = Category::latest()->paginate(10);
         return Inertia::render('Admin/Category/Index', [
             'categories' => $categories
         ]);
@@ -92,9 +92,9 @@ class CategoryController extends Controller
     {
         $categories = explode(',', $id);
         foreach ($categories as $id) {
-            $categories = Category::findOrFail($id);
-            File::delete(storage_path('app/public/' . $categories->image));
-            $categories->delete();
+            $category = Category::findOrFail($id);
+            File::delete(storage_path('app/public/' . $category->image));
+            $category->delete();
         }
 
         return redirect()->back()->with('success', 'Products deleted successfully');

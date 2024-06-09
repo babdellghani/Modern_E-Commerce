@@ -21,7 +21,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('brand', 'category', 'images')->paginate(10);
+        $products = Product::latest()->with('brand', 'category', 'images')->paginate(10);
         $brands = Brand::all();
         $categories = Category::all();
         return Inertia::render('Admin/Product/Index', [

@@ -35,7 +35,8 @@ watch(
             formm.name = newCategory.name;
             formm.slug = newCategory.slug;
             formm.description = newCategory.description;
-            imagePreview.value = newCategory.image;
+            formm.image = null;
+            imagePreview.value = newCategory.image ? '/storage/' + newCategory.image : null;
         }
     },
     { deep: true }

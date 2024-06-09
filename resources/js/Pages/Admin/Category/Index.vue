@@ -9,11 +9,6 @@ const categoriesPage = computed(() => usePage().props.categories);
 const categories = computed(() => categoriesPage.value.data);
 
 
-// Refresh categories
-const refreshCategories = () => {
-    categories.value = usePage().props.categories;
-};
-
 // Pagination
 const changePage = (page) => {
     router.visit(`/admin/categories?page=${page}`, {
