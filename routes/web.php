@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\ProductController;
@@ -9,6 +10,14 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\User\UserDashboardController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// User & Guest
+Route::prefix('cart')->controller(CartController::class)->group(function () {
+    Route::get('/', 'index')->name('cart');
+    Route::post('/add/{product}', 'store')->name('cart.add');
+    Route::post('/update/{product}/{quantity}', 'update')->name('cart.update');
+    Route::delete('/remove/{product}', 'destroy')->name('cart.remove');
+});
 
 // Auth
 Route::middleware([

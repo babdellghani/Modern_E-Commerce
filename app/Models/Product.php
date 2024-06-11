@@ -28,8 +28,8 @@ class Product extends Model
         return $this->hasMany(ProductImage::class);
     }
 
-    public function firstImage()
+    public function CartItems()
     {
-        return $this->hasOne(ProductImage::class)->orderBy('id', 'asc');
+        return $this->hasMany(CartItem::class);
     }
 }

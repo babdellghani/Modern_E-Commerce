@@ -1,4 +1,5 @@
 <script setup>
+import { router } from "@inertiajs/vue3";
 defineProps({
     products: {
         type: Object,
@@ -8,6 +9,29 @@ defineProps({
         required: true,
     },
 });
+
+const addToCart = async (product) => {
+    try {
+        await router.post(
+            "/cart/add/" + product.id,
+            {
+                product_id: product.id,
+                quantity: 1,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    console.log("success");
+                },
+                onError: (error) => {
+                    console.log(error);
+                },
+            }
+        );
+    } catch (error) {
+        console.log(error);
+    }
+};
 </script>
 
 <template>
@@ -107,9 +131,10 @@ defineProps({
                             >{{ product.name }}</a
                         >
 
-                        <ul 
+                        <ul
                             v-if="product.brand"
-                        class="mt-2 flex items-center gap-4">
+                            class="mt-2 flex items-center gap-4"
+                        >
                             <p
                                 class="text-sm font-medium text-gray-500 dark:text-gray-400"
                             >
@@ -129,6 +154,7 @@ defineProps({
                             <button
                                 type="button"
                                 class="inline-flex items-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                @click="addToCart(product)"
                             >
                                 <svg
                                     class="-ms-2 me-2 h-5 w-5"

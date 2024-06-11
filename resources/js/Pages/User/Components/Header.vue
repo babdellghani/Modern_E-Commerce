@@ -98,7 +98,8 @@ import { Link } from "@inertiajs/vue3";
                 </div>
 
                 <div class="flex items-center lg:space-x-2">
-                    <button
+                    <Link
+                        :href="route('cart')"
                         id="myCartDropdownButton1"
                         data-dropdown-toggle="myCartDropdown1"
                         type="button"
@@ -140,7 +141,7 @@ import { Link } from "@inertiajs/vue3";
                                 d="m19 9-7 7-7-7"
                             />
                         </svg>
-                    </button>
+                    </Link>
 
                     <div
                         id="myCartDropdown1"
