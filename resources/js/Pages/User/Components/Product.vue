@@ -21,7 +21,7 @@ const addToCart = async (product) => {
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    console.log("success");
+                    document.getElementById("myCartDropdownButton1").click();
                 },
                 onError: (error) => {
                     console.log(error);

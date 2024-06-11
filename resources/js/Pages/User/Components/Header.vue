@@ -1,16 +1,49 @@
 <script setup>
-import { Link } from "@inertiajs/vue3";
+import { Link, router, usePage } from "@inertiajs/vue3";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+
+const cartCount = computed(() => usePage().props.cartCount);
+const cartItems = computed(() => usePage().props.cartItems);
+const isNavFixed = ref(false);
+
+const removeItem = async (id) => {
+    try {
+        await router.delete(`/cart/remove/${id}`, {
+            preserveScroll: true,
+            onError: (error) => {
+                console.error(error);
+            },
+        });
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+const handleScroll = () => {
+    isNavFixed.value = window.scrollY > 0;
+};
+
+onMounted(() => {
+    window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 <template>
-    <nav class="bg-white dark:bg-gray-800 antialiased">
+    <nav :class="[
+        'bg-white dark:bg-gray-800 antialiased transition-all duration-300',
+        { 'fixed top-0 left-0 right-0 z-50 shadow-md': isNavFixed }
+    ]">
         <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-8">
                     <div class="shrink-0">
                         <Link
                             :href="route('home')"
-                            title=""
+                            title="V.Shop"
                             class="flex justify-center items-center gap-2"
                         >
                             <svg
@@ -98,13 +131,18 @@ import { Link } from "@inertiajs/vue3";
                 </div>
 
                 <div class="flex items-center lg:space-x-2">
-                    <Link
-                        :href="route('cart')"
+                    <button
                         id="myCartDropdownButton1"
                         data-dropdown-toggle="myCartDropdown1"
                         type="button"
-                        class="inline-flex items-center rounded-lg justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium leading-none text-gray-900 dark:text-white"
+                        class="relative inline-flex items-center rounded-lg justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium leading-none text-gray-900 dark:text-white"
                     >
+                        <span
+                            v-if="cartCount > 0"
+                            class="text-xs bg-red-600 px-1 rounded-full text-white font-thin absolute -top-1 -left-1.5 dark:bg-red-700 dark:text-red-900"
+                        >
+                            {{ cartCount }}
+                        </span>
                         <span class="sr-only"> Cart </span>
                         <svg
                             class="w-5 h-5 lg:me-1"
@@ -141,23 +179,28 @@ import { Link } from "@inertiajs/vue3";
                                 d="m19 9-7 7-7-7"
                             />
                         </svg>
-                    </Link>
+                    </button>
 
                     <div
                         id="myCartDropdown1"
                         class="hidden z-50 mx-auto max-w-sm space-y-4 overflow-hidden rounded-lg bg-white p-4 antialiased shadow-lg dark:bg-gray-800"
                     >
-                        <div class="grid grid-cols-2">
+                        <div
+                            v-if="cartItems.length > 0"
+                            v-for="item in cartItems"
+                            :key="item.id"
+                            class="grid grid-cols-2"
+                        >
                             <div>
                                 <a
                                     href="#"
-                                    class="truncate text-sm font-semibold leading-none text-gray-900 dark:text-white hover:underline"
-                                    >Apple iPhone 15</a
+                                    class="text-sm font-semibold leading-none text-gray-900 dark:text-white hover:underline"
+                                    >{{ item.product.name }}</a
                                 >
                                 <p
                                     class="mt-0.5 truncate text-sm font-normal text-gray-500 dark:text-gray-400"
                                 >
-                                    $599
+                                    ${{ item.product.price }}
                                 </p>
                             </div>
 
@@ -165,13 +208,14 @@ import { Link } from "@inertiajs/vue3";
                                 <p
                                     class="text-sm font-normal leading-none text-gray-500 dark:text-gray-400"
                                 >
-                                    Qty: 1
+                                    Qty: {{ item.quantity }}
                                 </p>
 
                                 <button
-                                    data-tooltip-target="tooltipRemoveItem1a"
+                                    :data-tooltip-target="`tooltipRemoveItem${item.id}`"
                                     type="button"
                                     class="text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-600"
+                                    @click="removeItem(item.product_id)"
                                 >
                                     <span class="sr-only"> Remove </span>
                                     <svg
@@ -189,7 +233,7 @@ import { Link } from "@inertiajs/vue3";
                                     </svg>
                                 </button>
                                 <div
-                                    id="tooltipRemoveItem1a"
+                                    :id="`tooltipRemoveItem${item.id}`"
                                     role="tooltip"
                                     class="tooltip invisible absolute z-10 inline-block rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-sm transition-opacity duration-300 dark:bg-gray-700"
                                 >
@@ -201,15 +245,21 @@ import { Link } from "@inertiajs/vue3";
                                 </div>
                             </div>
                         </div>
+                        <div
+                            v-else
+                            class="text-center text-sm font-normal text-gray-500 dark:text-gray-400"
+                        >
+                            Your cart is empty
+                        </div>
 
-                        <a
-                            href="#"
+                        <Link
+                            :href="route('cart.index')"
                             title=""
                             class="mb-2 me-2 inline-flex w-full items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                             role="button"
                         >
                             Proceed to Checkout
-                        </a>
+                        </Link>
                     </div>
 
                     <button
@@ -472,4 +522,5 @@ import { Link } from "@inertiajs/vue3";
             </div>
         </div>
     </nav>
+    <div v-if="isNavFixed" class="h-[72px]"></div>
 </template>

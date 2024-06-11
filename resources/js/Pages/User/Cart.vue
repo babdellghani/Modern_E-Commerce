@@ -1,11 +1,44 @@
 <script setup>
 import UserLayout from "./Layouts/UserLayout.vue";
 
-import { ref } from "vue";
-import { usePage } from "@inertiajs/vue3";
+import { computed } from "vue";
+import { Link, router, usePage } from "@inertiajs/vue3";
 
-const carts = ref(usePage().props.carts);
-console.log(carts.value.length);
+const carts = computed(() => usePage().props.carts);
+const total = computed(() => usePage().props.total);
+
+
+const removeItem = async (id) => {
+    try {
+        router.delete(`/cart/remove/${id}`, {
+            preserveScroll: true,
+            onError: (error) => {
+                console.error(error);
+            },
+        });
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+const updateQuantity = async (id, quantity) => {
+    try {
+        router.post(`/cart/update/${id}/${quantity}`, {
+            _method: "put",
+            product_id: id,
+            quantity: quantity,
+        },
+        {
+            preserveScroll: true,
+            onError: (error) => {
+                console.error(error);
+            },
+        }
+    );
+    } catch (error) {
+        console.error(error);
+    }
+};
 </script>
 
 <template>
@@ -27,6 +60,7 @@ console.log(carts.value.length);
                         <div v-if="carts.length > 0" class="space-y-6">
                             <div
                                 v-for="cart in carts"
+                                :key="cart.id"
                                 class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6"
                             >
                                 <div
@@ -34,13 +68,13 @@ console.log(carts.value.length);
                                 >
                                     <a href="#" class="shrink-0 md:order-1">
                                         <img
-                                            v-if="cart.product.images"
+                                            v-if="cart.product.images[0]"
                                             class="h-20 w-20 dark:hidden"
                                             :src="`/storage/${cart.product.images[0].image}`"
                                             :alt="cart.product.name"
                                         />
                                         <img
-                                            v-if="cart.product.images"
+                                            v-if="cart.product.images[0]"
                                             class="hidden h-20 w-20 dark:block"
                                             :src="`/storage/${cart.product.images[0].image}`"
                                             :alt="cart.product.name"
@@ -57,9 +91,9 @@ console.log(carts.value.length);
                                             <button
                                                 type="button"
                                                 id="decrement-button"
-                                                data-input-counter-decrement="counter-input"
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-                                            >
+                                                @click="updateQuantity(cart.product_id, cart.quantity - 1)"
+                                                >
                                                 <svg
                                                     class="h-2.5 w-2.5 text-gray-900 dark:text-white"
                                                     aria-hidden="true"
@@ -79,18 +113,17 @@ console.log(carts.value.length);
                                             <input
                                                 type="text"
                                                 id="counter-input"
-                                                data-input-counter
                                                 class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
-                                                placeholder=""
+                                                disabled
                                                 :value="cart.quantity"
                                                 required
                                             />
                                             <button
                                                 type="button"
                                                 id="increment-button"
-                                                data-input-counter-increment="counter-input"
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-                                            >
+                                                @click="updateQuantity(cart.product_id, cart.quantity + 1)"
+                                                >
                                                 <svg
                                                     class="h-2.5 w-2.5 text-gray-900 dark:text-white"
                                                     aria-hidden="true"
@@ -156,6 +189,7 @@ console.log(carts.value.length);
                                             <button
                                                 type="button"
                                                 class="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500"
+                                                @click="removeItem(cart.product_id)"
                                             >
                                                 <svg
                                                     class="me-1.5 h-5 w-5"
@@ -182,8 +216,25 @@ console.log(carts.value.length);
                             </div>
                         </div>
 
+                        <div
+                            v-else
+                            class="flex flex-col items-center justify-center gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6"
+                        >
+                            <p
+                                class="text-center text-sm font-medium text-gray-500 dark:text-gray-400"
+                            >
+                                Your cart is empty
+                            </p>
+                            <Link
+                                :href="route('home')"
+                                class="block text-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-500"
+                                >Continue Shopping</Link
+                            >
+                        </div>
 
-                        <div class="hidden xl:mt-8 xl:block">
+                        <hr class="border-gray-200 dark:border-gray-700" />
+
+                        <div class="hidden xl:mt-8 lg:block">
                             <h3
                                 class="text-2xl font-semibold text-gray-900 dark:text-white"
                             >
@@ -237,7 +288,7 @@ console.log(carts.value.length);
                                         <button
                                             data-tooltip-target="favourites-tooltip-1"
                                             type="button"
-                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white p-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white p-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
                                         >
                                             <svg
                                                 class="h-5 w-5"
@@ -268,7 +319,7 @@ console.log(carts.value.length);
                                         </div>
                                         <button
                                             type="button"
-                                            class="inline-flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                                            class="inline-flex w-full items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                         >
                                             <svg
                                                 class="-ms-2 me-2 h-5 w-5"
@@ -338,7 +389,7 @@ console.log(carts.value.length);
                                         <button
                                             data-tooltip-target="favourites-tooltip-2"
                                             type="button"
-                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white p-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white p-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
                                         >
                                             <svg
                                                 class="h-5 w-5"
@@ -369,7 +420,7 @@ console.log(carts.value.length);
                                         </div>
                                         <button
                                             type="button"
-                                            class="inline-flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                                            class="inline-flex w-full items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                         >
                                             <svg
                                                 class="-ms-2 me-2 h-5 w-5"
@@ -439,7 +490,7 @@ console.log(carts.value.length);
                                         <button
                                             data-tooltip-target="favourites-tooltip-3"
                                             type="button"
-                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white p-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
+                                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white p-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700"
                                         >
                                             <svg
                                                 class="h-5 w-5"
@@ -471,7 +522,7 @@ console.log(carts.value.length);
 
                                         <button
                                             type="button"
-                                            class="inline-flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                                            class="inline-flex w-full items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                         >
                                             <svg
                                                 class="-ms-2 me-2 h-5 w-5"
@@ -523,7 +574,7 @@ console.log(carts.value.length);
                                         <dd
                                             class="text-base font-medium text-gray-900 dark:text-white"
                                         >
-                                            $7,592.00
+                                            ${{ total.toFixed(2) }}
                                         </dd>
                                     </dl>
 
@@ -591,7 +642,7 @@ console.log(carts.value.length);
 
                             <a
                                 href="#"
-                                class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                                class="flex w-full items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                 >Proceed to Checkout</a
                             >
 
@@ -601,10 +652,9 @@ console.log(carts.value.length);
                                 >
                                     or
                                 </span>
-                                <a
-                                    href="#"
-                                    title=""
-                                    class="inline-flex items-center gap-2 text-sm font-medium text-primary-700 underline hover:no-underline dark:text-primary-500"
+                                <Link
+                                    :href="route('home')"
+                                    class="inline-flex items-center gap-2 text-sm font-medium text-blue-700 underline hover:no-underline dark:text-blue-500"
                                 >
                                     Continue Shopping
                                     <svg
@@ -622,7 +672,7 @@ console.log(carts.value.length);
                                             d="M19 12H5m14 0-4 4m4-4-4-4"
                                         />
                                     </svg>
-                                </a>
+                                </Link>
                             </div>
                         </div>
 
@@ -640,14 +690,14 @@ console.log(carts.value.length);
                                     <input
                                         type="text"
                                         id="voucher"
-                                        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500"
+                                        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                                         placeholder=""
                                         required
                                     />
                                 </div>
                                 <button
                                     type="submit"
-                                    class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                                    class="flex w-full items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                 >
                                     Apply Code
                                 </button>

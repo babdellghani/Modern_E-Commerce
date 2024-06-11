@@ -37,11 +37,12 @@ onMounted(() => {
             
             <!-- Error messages -->
             <div
-                v-if="$page.props.flash.error"
+                v-if="$page.props.errors"
+                v-for="error in $page.props.errors"
                 class="flex p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800"
                 role="alert"
             >
-                <span class="font-medium">{{ $page.props.flash.error }}</span>
+                <span class="font-medium">{{ error }}</span>
             </div>
 
             <!-- Page content -->

@@ -13,10 +13,10 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // User & Guest
 Route::prefix('cart')->controller(CartController::class)->group(function () {
-    Route::get('/', 'index')->name('cart');
-    Route::post('/add/{product}', 'store')->name('cart.add');
-    Route::post('/update/{product}/{quantity}', 'update')->name('cart.update');
-    Route::delete('/remove/{product}', 'destroy')->name('cart.remove');
+    Route::get('/', 'index')->name('cart.index');
+    Route::post('/add/{product}', 'store')->name('cart.store');
+    Route::put('/update/{product}/{quantity}', 'update')->name('cart.update');
+    Route::delete('/remove/{product}', 'destroy')->name('cart.destroy');
 });
 
 // Auth

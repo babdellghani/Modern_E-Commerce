@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Helpers\Cart;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -38,7 +39,9 @@ class HandleInertiaRequests extends Middleware
         return array_merge(parent::share($request), [
             'flash' => [
                 'success' => session('success'),
-            ]
+            ],
+            'cartCount' => Cart::getCount(),
+            'cartItems' => Cart::getCartItemsWithoutImage(),
         ]);
     }
 }

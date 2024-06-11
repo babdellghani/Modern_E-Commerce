@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use Inertia\Inertia;
+use App\Helpers\Cart;
 use App\Models\Product;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
@@ -17,17 +18,19 @@ class CartController extends Controller
     public function index()
     {
         if (!Auth::check()) {
-            $carts = session()->get('cart', []);
-            $products = Product::find(array_keys($carts));
+            Cart::getCount();
+            $carts = Cart::getCartItemsWithImage();
             return Inertia::render('User/Cart', [
-                'productsCart' => $products,
                 'carts' => $carts
             ]);
         } else {
-            $user_id = Auth::user()->id;
-            $carts = CartItem::where('user_id', $user_id)->with('product:id,name,price', 'product.images')->get();
+            $count = Cart::getCount();
+            $carts = Cart::getCartItemsWithImage();
+            $total = Cart::getTotal();
             return Inertia::render('User/Cart', [
-                'carts' => $carts
+                'carts' => $carts,
+                'count' => $count,
+                'total' => $total
             ]);
         }
     }
@@ -47,7 +50,7 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1' ,
+            'quantity' => 'required|integer|min:1|max:' . Product::find($request->product_id)->quantity,
         ]);
         if (!Auth::check()) {
             $product_id = $request->product_id;
@@ -114,7 +117,7 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1' . Product::find($request->product_id)->quantity,
+            'quantity' => 'required|integer|min:1|max:' . Product::find($request->product_id)->quantity,
         ]);
 
         if (!Auth::check()) {
