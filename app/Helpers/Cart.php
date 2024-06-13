@@ -16,12 +16,14 @@ class Cart
      */
     public static function getCount(): int
     {
-        if ($user = Auth::user()) {
+        if (Auth::check()) {
+            $user = Auth::user();
             return CartItem::whereUserId($user->id)->count(); //sum('quantity')
         } else {
-            return array_reduce(self::getSessionCartItems(), function ($carry, $item) {
-                return $carry + $item['quantity'];
-            }, 0);
+            $sessionCartItems = self::getSessionCartItems();
+
+            // Ensure the session cart items are in the expected format
+            return count($sessionCartItems);
         }
     }
 

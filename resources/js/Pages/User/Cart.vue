@@ -74,9 +74,21 @@ const updateQuantity = async (id, quantity) => {
                                             :alt="cart.product.name"
                                         />
                                         <img
+                                            v-else
+                                            class="h-20 w-20 dark:hidden"
+                                            src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/imac-front.svg"
+                                            :alt="cart.product.name"
+                                        />
+                                        <img
                                             v-if="cart.product.images[0]"
                                             class="hidden h-20 w-20 dark:block"
                                             :src="`/storage/${cart.product.images[0].image}`"
+                                            :alt="cart.product.name"
+                                        />
+                                        <img
+                                            v-else
+                                            class="hidden h-20 w-20 dark:block"
+                                            src="https://flowbite.s3.amazonaws.com/blocks/e-commerce/imac-front.svg"
                                             :alt="cart.product.name"
                                         />
                                     </a>

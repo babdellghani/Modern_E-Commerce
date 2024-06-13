@@ -18,18 +18,15 @@ class CartController extends Controller
     public function index()
     {
         if (!Auth::check()) {
-            Cart::getCount();
             $carts = Cart::getCartItemsWithImage();
             return Inertia::render('User/Cart', [
                 'carts' => $carts
             ]);
         } else {
-            $count = Cart::getCount();
             $carts = Cart::getCartItemsWithImage();
             $total = Cart::getTotal();
             return Inertia::render('User/Cart', [
                 'carts' => $carts,
-                'count' => $count,
                 'total' => $total
             ]);
         }
@@ -68,7 +65,7 @@ class CartController extends Controller
 
             session()->put('cart', $carts);
 
-            return redirect('/store.cart')->with('success', 'Item added to cart successfully');
+            return redirect()->back()->with('success', 'Item added to cart successfully');
         } else {
             $user_id = Auth::user()->id;
             $product_id = $request->product_id;
