@@ -23,10 +23,11 @@ const removeItem = async (id) => {
 
 const updateQuantity = async (id, quantity) => {
     try {
+        console.log(id, quantity);
         router.post(`/cart/update/${id}/${quantity}`, {
             _method: "put",
-            product_id: id,
             quantity: quantity,
+            product_id: id,
         },
         {
             preserveScroll: true,
@@ -104,7 +105,7 @@ const updateQuantity = async (id, quantity) => {
                                                 type="button"
                                                 id="decrement-button"
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-                                                @click="updateQuantity(cart.product_id, cart.quantity - 1)"
+                                                @click="updateQuantity(cart.product.id, cart.quantity - 1)"
                                                 >
                                                 <svg
                                                     class="h-2.5 w-2.5 text-gray-900 dark:text-white"
@@ -134,7 +135,7 @@ const updateQuantity = async (id, quantity) => {
                                                 type="button"
                                                 id="increment-button"
                                                 class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-                                                @click="updateQuantity(cart.product_id, cart.quantity + 1)"
+                                                @click="updateQuantity(cart.product.id, cart.quantity + 1)"
                                                 >
                                                 <svg
                                                     class="h-2.5 w-2.5 text-gray-900 dark:text-white"
@@ -201,7 +202,7 @@ const updateQuantity = async (id, quantity) => {
                                             <button
                                                 type="button"
                                                 class="inline-flex items-center text-sm font-medium text-red-600 hover:underline dark:text-red-500"
-                                                @click="removeItem(cart.product_id)"
+                                                @click="removeItem(cart.product.id)"
                                             >
                                                 <svg
                                                     class="me-1.5 h-5 w-5"

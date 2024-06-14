@@ -215,7 +215,7 @@ onUnmounted(() => {
                                     :data-tooltip-target="`tooltipRemoveItem${item.id}`"
                                     type="button"
                                     class="text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-600"
-                                    @click="removeItem(item.product_id)"
+                                    @click="removeItem(item.product.id)"
                                 >
                                     <span class="sr-only"> Remove </span>
                                     <svg

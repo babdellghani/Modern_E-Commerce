@@ -19,8 +19,10 @@ class CartController extends Controller
     {
         if (!Auth::check()) {
             $carts = Cart::getCartItems($image = true);
+            $total = Cart::getTotal();
             return Inertia::render('User/Cart', [
-                'carts' => $carts
+                'carts' => $carts,
+                'total' => $total
             ]);
         } else {
             $carts = Cart::getCartItems($image = true);
@@ -114,7 +116,7 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1|max:' . Product::find($request->product_id)->quantity,
+            'quantity' => 'required|integer|min:1',
         ]);
 
         if (!Auth::check()) {
