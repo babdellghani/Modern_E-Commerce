@@ -18,12 +18,12 @@ class CartController extends Controller
     public function index()
     {
         if (!Auth::check()) {
-            $carts = Cart::getCartItemsWithImage();
+            $carts = Cart::getCartItems($image = true);
             return Inertia::render('User/Cart', [
                 'carts' => $carts
             ]);
         } else {
-            $carts = Cart::getCartItemsWithImage();
+            $carts = Cart::getCartItems($image = true);
             $total = Cart::getTotal();
             return Inertia::render('User/Cart', [
                 'carts' => $carts,

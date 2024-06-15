@@ -42,28 +42,16 @@ class Cart
      * 
      * @return array
      */
-    public static function getCartItemsWithoutImage()
+    public static function getCartItems($image = true)
     {
         if (Auth::user()) {
             $user = Auth::user();
-            return CartItem::whereUserId($user->id)->with('product:id,name,price')->get()->toArray();
+            return CartItem::whereUserId($user->id)->with('product:id,name,price')
+                ->when($image, function ($query) {
+                    return $query->with('product.images');
+                })->get()->toArray();
         } else {
-            return self::getSessionCartItems();
-        }
-    }
-
-    /**
-     * Get the total items in the cart.
-     * 
-     * @return array
-     */
-    public static function getCartItemsWithImage()
-    {
-        if (Auth::user()) {
-            $user = Auth::user();
-            return CartItem::whereUserId($user->id)->with('product:id,name,price', 'product.images')->get()->toArray();
-        } else {
-            return self::getSessionCartItems();
+            return $image ? self::getSessionCartItemsAndProducts($image = true) : self::getSessionCartItemsAndProducts($image = false);
         }
     }
 
@@ -85,78 +73,45 @@ class Cart
      */
     public static function getTotal(): float
     {
-        return array_reduce(self::getCartItemsWithoutImage(), function ($carry, $item) {
+        return array_reduce(self::getCartItems($image = false), function ($carry, $item) {
             return $carry + $item['quantity'] * $item['product']['price'];
         }, 0);
     }
 
-    // public static function saveCookieCartItems()
-    // {
-    //     $user = auth()->user();
-    //     $userCartItems = CartItem::where(['user_id' => $user->id])->get()->keyBy('product_id');
-    //     $savedCartItems = [];
-    //     foreach (self::getCookieCartItems() as $cartItem) {
-    //         if (isset($userCartItems[$cartItem['product_id']])) {
-    //             $userCartItems[$cartItem['product_id']]->update(['quantity' => $cartItem['quantity']]);
-    //             continue;
-    //         }
-    //         $savedCartItems[] = [
-    //             'user_id' => $user->id,
-    //             'product_id' => $cartItem['product_id'],
-    //             'quantity' => $cartItem['quantity'],
-    //         ];
-    //     }
-    //     if (!empty($savedCartItems)) {
-    //         CartItem::insert($savedCartItems);
-    //     }
-    // }
+    /**
+     * Get the cart items.
+     * 
+     * @return array
+     */
+    public static function getSessionCartItemsAndProducts($image = true): array
+    {
+        $cart = self::getSessionCartItems();
 
-    // public static function moveCartItemsIntoDb()
-    // {
-    //     $request = request();
-    //     $cartItems = self::getCookieCartItems();
-    //     $newCartItems = [];
-    //     foreach ($cartItems as $cartItem) {
-    //         // Check if the record already exists in the database
-    //         $existingCartItem = CartItem::where([
-    //             'user_id' => $request->user()->id,
-    //             'product_id' => $cartItem['product_id'],
-    //         ])->first();
+        // Get KEYS of cart items
+        $ids = array_keys($cart);
+        if (empty($ids)) {
+            return [];
+        }
 
-    //         if (!$existingCartItem) {
-    //             // Only insert if it doesn't already exist
-    //             $newCartItems[] = [
-    //                 'user_id' => $request->user()->id,
-    //                 'product_id' => $cartItem['product_id'],
-    //                 'quantity' => $cartItem['quantity'],
-    //             ];
-    //         }
-    //     }
+        // Get products
+        $products = Product::whereIn('id', $ids)
+            ->when($image, function ($query) {
+                return $query->with('images');
+            })
+            ->get();
 
+        // Initialize an empty array for the cart items
+        $cartItems = [];
 
-    //     if (!empty($newCartItems)) {
-    //         // Insert the new cart items into the database
-    //         CartItem::insert($newCartItems);
-    //     }
-    // }
+        // Loop through the cart array to build the cart items
+        foreach ($cart as $productId => $quantity) {
+            $product = $products->firstWhere('id', $productId);
+            $cartItems[] = [
+                'product' => $product,
+                'quantity' => $quantity,
+            ];
+        }
 
-
-    // /**
-    //  * Get the cart items.
-    //  * 
-    //  * @return array
-    //  */
-    // public static function getProductsAndCartItems()
-    // {
-    //     $cart = self::getCartItems();
-
-    //     $ids = Arr::pluck($cart, 'product_id');
-    //     $products = Product::whereIn('id', $ids)->get();
-    //     $cartItems = Arr::map($cart, fn($item) => [
-    //         'product' => $products->where('id', $item['product_id'])->first(),
-    //         'quantity' => $item['quantity'],
-    //     ]);
-
-    //     return $cartItems;
-    // }
+        return $cartItems;
+    }
 }

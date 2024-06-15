@@ -307,8 +307,6 @@ onUnmounted(() => {
                     <div v-else class="flex items-center lg:space-x-2">
                         <Link
                             :href="route('login')"
-                            id="userDropdownButton1"
-                            data-dropdown-toggle="userDropdown1"
                             type="button"
                             class="inline-flex items-center rounded-lg justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium leading-none text-gray-900 dark:text-white"
                         >
@@ -334,8 +332,6 @@ onUnmounted(() => {
                         </Link>
                         <Link
                             :href="route('register')"
-                            id="userDropdownButton1"
-                            data-dropdown-toggle="userDropdown1"
                             type="button"
                             class="inline-flex items-center rounded-lg justify-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm font-medium leading-none text-gray-900 dark:text-white"
                         >

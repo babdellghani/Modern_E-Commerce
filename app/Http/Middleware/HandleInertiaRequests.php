@@ -41,7 +41,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => session('success'),
             ],
             'cartCount' => Cart::getCount(),
-            'cartItems' => Cart::getCartItemsWithoutImage(),
+            'cartItems' => Cart::getCartItems($image = false),
         ]);
     }
 }
