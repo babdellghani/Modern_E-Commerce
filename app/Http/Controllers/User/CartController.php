@@ -7,6 +7,7 @@ use App\Helpers\Cart;
 use App\Models\Product;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
+use App\Rules\ValidProductQuantity;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
@@ -42,6 +43,7 @@ class CartController extends Controller
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:1|max:' . Product::find($request->product_id)->quantity,
         ]);
+
         if (!Auth::check()) {
             $product_id = $request->product_id;
             $quantity = $request->quantity;
@@ -79,7 +81,7 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
+            'quantity' => ['required', 'integer', 'min:1', new ValidProductQuantity($request->product_id)],
         ]);
 
         if (!Auth::check()) {

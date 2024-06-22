@@ -152,7 +152,7 @@ class Cart
      */
     public static function setCartItemsUser(int $user_id, int $product_id, int $quantity)
     {
-        $existingCartItem = CartItem::where('user_id', $user_id)->where('product_id', $product_id)->firstOrFail();
+        $existingCartItem = CartItem::where('user_id', $user_id)->where('product_id', $product_id)->first();
 
         if ($existingCartItem) {
             // If it exists, update the quantity

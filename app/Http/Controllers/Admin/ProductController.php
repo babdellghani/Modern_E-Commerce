@@ -120,7 +120,7 @@ class ProductController extends Controller
     public function deleteImage(string $id)
     {
         $image = ProductImage::findOrFail($id);
-        File::delete(storage_path('app/public/' . $image->image));
+        $image->image ? File::delete(storage_path('app/public/' . $image->image)) : '';
         $image->delete();
         return redirect()->back()->with('success', 'Image deleted successfully');
     }
@@ -136,7 +136,7 @@ class ProductController extends Controller
         $productImage = ProductImage::where('product_id', $id)->get();
         if (count($productImage) > 0) {
             foreach ($productImage as $image) {
-                File::delete(storage_path('app/public/' . $image->image));
+                $image->image ? File::delete(storage_path('app/public/' . $image->image)) : '';
                 $image->delete();
             }
         }
@@ -161,7 +161,7 @@ class ProductController extends Controller
             $productImage = ProductImage::where('product_id', $id)->get();
             if (count($productImage) > 0) {
                 foreach ($productImage as $image) {
-                    File::delete(storage_path('app/public/' . $image->image));
+                    $image->image ? File::delete(storage_path('app/public/' . $image->image)) : '';
                     $image->delete();
                 }
             }

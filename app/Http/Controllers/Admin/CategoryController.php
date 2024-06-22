@@ -80,7 +80,7 @@ class CategoryController extends Controller
     public function destroy(string $id)
     {
         $category = Category::findOrFail($id);
-        File::delete(public_path('storage/' . $category->image));
+        $category->image ? File::delete(public_path('storage/' . $category->image)) : '';
         $category->delete();
         return redirect()->back()->with('success', 'Category deleted successfully');
     }
@@ -93,7 +93,7 @@ class CategoryController extends Controller
         $categories = explode(',', $id);
         foreach ($categories as $id) {
             $category = Category::findOrFail($id);
-            File::delete(storage_path('app/public/' . $category->image));
+            $category->image ? File::delete(storage_path('app/public/' . $category->image)) : '';
             $category->delete();
         }
 

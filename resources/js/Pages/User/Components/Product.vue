@@ -150,11 +150,12 @@ const addToCart = async (product) => {
                             >
                                 {{ product.price }}$
                             </p>
-
+                            
                             <button
                                 type="button"
                                 class="inline-flex items-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                 @click="addToCart(product)"
+                                v-if="product.quantity > 0"
                             >
                                 <svg
                                     class="-ms-2 me-2 h-5 w-5"
@@ -174,6 +175,14 @@ const addToCart = async (product) => {
                                     />
                                 </svg>
                                 Add to cart
+                            </button>
+
+                            <button
+                                v-else
+                                type="button"
+                                class="inline-flex items-center rounded-lg bg-gray-200 px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                            >
+                                Not available
                             </button>
                         </div>
                     </div>

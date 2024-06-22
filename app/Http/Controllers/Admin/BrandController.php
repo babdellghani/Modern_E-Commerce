@@ -68,7 +68,7 @@ class BrandController extends Controller
         $brand = Brand::findOrFail($id);
         if ($request->hasFile('image')) {
             $brandData['image'] = $request->file('image')->store('brands', 'public');
-            File::delete(storage_path('app/public/' . $brand->image));
+            $brand->image ? File::delete(storage_path('app/public/' . $brand->image)) : '';
         }
         $brand->update($brandData);
         return redirect()->back()->with('success', 'Brand updated successfully');
@@ -80,7 +80,7 @@ class BrandController extends Controller
     public function destroy(string $id)
     {
         $brand = Brand::findOrFail($id);
-        File::delete(storage_path('app/public/' . $brand->image));
+        $brand->image ? File::delete(storage_path('app/public/' . $brand->image)) : '';
         $brand->delete();
         return redirect()->back()->with('success', 'Brand deleted successfully');
     }
@@ -93,7 +93,7 @@ class BrandController extends Controller
         $brands = explode(',', $id);
         foreach ($brands as $id) {
             $brand = Brand::findOrFail($id);
-            File::delete(storage_path('app/public/' . $brand->image));
+            $brand->image ? File::delete(storage_path('app/public/' . $brand->image)) : '';
             $brand->delete();
         }
 

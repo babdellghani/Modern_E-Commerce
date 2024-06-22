@@ -23,7 +23,6 @@ const removeItem = async (id) => {
 
 const updateQuantity = async (id, quantity) => {
     try {
-        console.log(id, quantity);
         router.post(`/cart/update/${id}/${quantity}`, {
             _method: "put",
             quantity: quantity,
