@@ -17,21 +17,12 @@ class CartController extends Controller
      */
     public function index()
     {
-        if (!Auth::check()) {
-            $carts = Cart::getCartItems($image = true);
-            $total = Cart::getTotal();
-            return Inertia::render('User/Cart', [
-                'carts' => $carts,
-                'total' => $total
-            ]);
-        } else {
-            $carts = Cart::getCartItems($image = true);
-            $total = Cart::getTotal();
-            return Inertia::render('User/Cart', [
-                'carts' => $carts,
-                'total' => $total
-            ]);
-        }
+        $carts = Cart::getCartItems($image = true);
+        $total = Cart::getTotal();
+        return Inertia::render('User/Cart', [
+            'carts' => $carts,
+            'total' => $total
+        ]);
     }
 
     /**
@@ -54,42 +45,14 @@ class CartController extends Controller
         if (!Auth::check()) {
             $product_id = $request->product_id;
             $quantity = $request->quantity;
-
-            $carts = session()->get('cart', []);
-
-            // If the product already exists in the cart, update the quantity
-            if (isset($carts[$product_id])) {
-                $carts[$product_id] += $quantity;
-            } else {
-                // Otherwise, add the product to the cart
-                $carts[$product_id] = $quantity;
-            }
-
-            session()->put('cart', $carts);
-
+            Cart::setCartItemsSession($product_id, $quantity);
             return redirect()->back()->with('success', 'Item added to cart successfully');
         } else {
             $user_id = Auth::user()->id;
             $product_id = $request->product_id;
             $quantity = $request->quantity;
-
-            // Check if the product already exists in the cart for the user
-            $existingCartItem = CartItem::where('user_id', $user_id)->where('product_id', $product_id)->first();
-
-            if ($existingCartItem) {
-                // If it exists, update the quantity
-                $existingCartItem->quantity += $quantity;
-                $existingCartItem->save();
-                return redirect()->back()->with('success', 'Item updated in cart successfully');
-            } else {
-                // If it doesn't exist, create a new cart item
-                $cart = new CartItem();
-                $cart->user_id = $user_id;
-                $cart->product_id = $product_id;
-                $cart->quantity = $quantity;
-                $cart->save();
-                return redirect()->back()->with('success', 'Item added to cart successfully');
-            }
+            Cart::setCartItemsUser($user_id, $product_id, $quantity);
+            return redirect()->back()->with('success', 'Item added to cart successfully');
         }
     }
 
@@ -122,18 +85,14 @@ class CartController extends Controller
         if (!Auth::check()) {
             $product_id = $request->product_id;
             $quantity = $request->quantity;
-            $carts = session()->get('cart', []);
-            $carts[$product_id] = $quantity;
-            session()->put('cart', $carts);
+            Cart::updateCartItemsSession($product_id, $quantity);
             return redirect()->back()->with('success', 'Item updated in cart successfully');
         } else {
             $user_id = Auth::user()->id;
             $product_id = $request->product_id;
             $quantity = $request->quantity;
 
-            $cart = CartItem::where('user_id', $user_id)->where('product_id', $product_id)->first();
-            $cart->quantity = $quantity;
-            $cart->save();
+            Cart::updateCartItemsUser($user_id, $product_id, $quantity);
 
             return redirect()->back()->with('success', 'Item updated in cart successfully');
         }
@@ -145,14 +104,11 @@ class CartController extends Controller
     public function destroy(string $id)
     {
         if (!Auth::check()) {
-            $carts = session()->get('cart', []);
-            unset($carts[$id]);
-            session()->put('cart', $carts);
+            Cart::removeCartItemsSession($id);
             return redirect()->back()->with('success', 'Item removed from cart successfully');
         } else {
             $user_id = Auth::user()->id;
-            $cart = CartItem::where('user_id', $user_id)->where('product_id', $id)->first();
-            $cart->delete();
+            Cart::removeCartItemsUser($user_id, $id);
             return redirect()->back()->with('success', 'Item removed from cart successfully');
         }
     }

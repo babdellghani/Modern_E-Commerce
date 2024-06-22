@@ -26,7 +26,6 @@ class HomeController extends Controller
         return Inertia::render('User/Home', [
             'products' => $products,
             'brands' => $brands,
-            // 'cartItems' => $cartItems
         ]);
     }
 }
