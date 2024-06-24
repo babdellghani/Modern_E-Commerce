@@ -30,12 +30,11 @@ const handleFileChange = (file) => {
     form.images = form.imagesView.map((file) => file.raw);
 };
 
-
 // Add Product
 const FormSubmited = ref(false);
 const AddProduct = async () => {
     try {
-        await router.post("/admin/products/store", form, {
+        router.post("/admin/products/store", form, {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => {
@@ -73,7 +72,7 @@ const slugify = (text) => {
         .toLowerCase()
         .replace(/ /g, "-")
         .replace(/[^\w-]+/g, "");
-}
+};
 
 // Watch For Form Changes
 watch(

@@ -36,7 +36,9 @@ watch(
             formm.slug = newBrand.slug;
             formm.description = newBrand.description;
             formm.image = null;
-            imagePreview.value = newBrand.image ? '/storage/' + newBrand.image : null
+            imagePreview.value = newBrand.image
+                ? "/storage/" + newBrand.image
+                : null;
         }
     },
     { deep: true }
@@ -63,7 +65,7 @@ const slugify = (text) => {
 const FormSubmited = ref(false);
 const updateBrand = async () => {
     try {
-        await router.post(
+        router.post(
             "/admin/brands/" + props.brand.id + "/update",
             { _method: "put", ...formm },
             {

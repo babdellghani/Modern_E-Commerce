@@ -8,7 +8,6 @@ import Edit from "./Edit.vue";
 const categoriesPage = computed(() => usePage().props.categories);
 const categories = computed(() => categoriesPage.value.data);
 
-
 // Pagination
 const changePage = (page) => {
     router.visit(`/admin/categories?page=${page}`, {
@@ -17,20 +16,21 @@ const changePage = (page) => {
     });
 };
 
-
 // Edit Category
 const editModalOpen = ref(false);
 const selectedCategory = ref(null);
 
 const openEditModal = (id) => {
-    selectedCategory.value = categories.value.find((category) => category.id === id);
+    selectedCategory.value = categories.value.find(
+        (category) => category.id === id
+    );
     editModalOpen.value = true;
 };
 
 // Delete Category
 const deleteCategory = async (id) => {
     try {
-        await router.delete("/admin/categories/" + id + "/destroy", {
+        router.delete("/admin/categories/" + id + "/destroy", {
             preserveScroll: true,
             onSuccess: () => {
                 categories.value = categories.value.filter(
@@ -52,7 +52,9 @@ const selectAll = ref(false);
 
 const toggleAllCheckboxes = () => {
     if (selectAll.value) {
-        selectedCategories.value = categories.value.map((category) => category.id);
+        selectedCategories.value = categories.value.map(
+            (category) => category.id
+        );
     } else {
         selectedCategories.value = [];
     }
@@ -61,7 +63,7 @@ const toggleAllCheckboxes = () => {
 const deleteAll = async () => {
     if (selectedCategories.value.length > 0) {
         try {
-            await router.delete(
+            router.delete(
                 "/admin/categories/" +
                     selectedCategories.value +
                     "/multiple/delete",
@@ -87,7 +89,8 @@ const deleteAll = async () => {
 };
 
 watch(selectedCategories, () => {
-    selectAll.value = selectedCategories.value.length === categories.value.length;
+    selectAll.value =
+        selectedCategories.value.length === categories.value.length;
 });
 </script>
 
@@ -233,15 +236,11 @@ watch(selectedCategories, () => {
                                     </td>
                                     <td
                                         scope="row"
-                                        class="px-4 py-2 font-medium text-gray-900  max-w-24 truncate dark:text-white"
+                                        class="px-4 py-2 font-medium text-gray-900 max-w-24 truncate dark:text-white"
                                     >
-                                        <div
-                                            class="flex items-center"
-                                        >
+                                        <div class="flex items-center">
                                             <img
-                                                v-if="
-                                                    category.image
-                                                "
+                                                v-if="category.image"
                                                 :src="`/storage/${category.image}`"
                                                 :alt="category.name"
                                                 class="w-8 h-8 mr-3 rounded-md object-contain"
@@ -252,7 +251,9 @@ watch(selectedCategories, () => {
                                                 :alt="category.name"
                                                 class="w-8 h-8 mr-3 rounded-md object-contain"
                                             />
-                                            <span class="truncate">{{ category.name }} </span>
+                                            <span class="truncate"
+                                                >{{ category.name }}
+                                            </span>
                                         </div>
                                     </td>
                                     <td class="px-4 py-2 max-w-24 truncate">
@@ -462,7 +463,8 @@ watch(selectedCategories, () => {
                                     @click="
                                         categoriesPage.current_page !== 1
                                             ? changePage(
-                                                  categoriesPage.current_page - 1
+                                                  categoriesPage.current_page -
+                                                      1
                                               )
                                             : null
                                     "
@@ -470,11 +472,14 @@ watch(selectedCategories, () => {
                                         'cursor-pointer flex items-center justify-center h-full py-1.5 px-3 ml-0 text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white',
                                         {
                                             '!cursor-not-allowed opacity-50':
-                                                categoriesPage.current_page === 1,
+                                                categoriesPage.current_page ===
+                                                1,
                                         },
                                     ]"
                                     :tabindex="
-                                        categoriesPage.current_page === 1 ? -1 : 0
+                                        categoriesPage.current_page === 1
+                                            ? -1
+                                            : 0
                                     "
                                 >
                                     <span class="sr-only">Previous</span>
@@ -515,7 +520,8 @@ watch(selectedCategories, () => {
                                         categoriesPage.current_page !==
                                         categoriesPage.last_page
                                             ? changePage(
-                                                  categoriesPage.current_page + 1
+                                                  categoriesPage.current_page +
+                                                      1
                                               )
                                             : null
                                     "

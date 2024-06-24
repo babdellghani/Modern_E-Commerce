@@ -23,7 +23,7 @@ const changeImage = (e) => {
 const FormSubmited = ref(false);
 const AddCategory = async () => {
     try {
-        await router.post("/admin/categories/store", form, {
+        router.post("/admin/categories/store", form, {
             preserveScroll: true,
             onSuccess: () => {
                 form.reset();
@@ -60,7 +60,7 @@ const slugify = (text) => {
         .toLowerCase()
         .replace(/ /g, "-")
         .replace(/[^\w-]+/g, "");
-}
+};
 
 // Watch For Form Changes
 watch(
@@ -287,7 +287,9 @@ watch(
                                 SVG, PNG, JPG or GIF (MAX. 2MB).
                             </p>
                             <div class="mt-2" v-if="imagePreview">
-                                <div class="flex items-center justify-center w-full">
+                                <div
+                                    class="flex items-center justify-center w-full"
+                                >
                                     <img
                                         class="w-40 h-40 rounded-lg object-contain"
                                         :src="imagePreview"

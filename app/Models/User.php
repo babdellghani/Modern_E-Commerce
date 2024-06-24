@@ -90,4 +90,14 @@ class User extends Authenticatable
                 return '/';
         }
     }
+
+    /**
+     * Get the user's cart items.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
 }

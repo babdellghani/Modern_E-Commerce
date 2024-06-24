@@ -8,7 +8,7 @@ const isNavFixed = ref(false);
 
 const removeItem = async (id) => {
     try {
-        await router.delete(`/cart/remove/${id}`, {
+        router.delete(`/cart/remove/${id}`, {
             preserveScroll: true,
             onError: (error) => {
                 console.error(error);
@@ -24,19 +24,21 @@ const handleScroll = () => {
 };
 
 onMounted(() => {
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
 });
 
 onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll);
+    window.removeEventListener("scroll", handleScroll);
 });
 </script>
 
 <template>
-    <nav :class="[
-        'bg-white dark:bg-gray-800 antialiased transition-all duration-300',
-        { 'fixed top-0 left-0 right-0 z-50 shadow-md': isNavFixed }
-    ]">
+    <nav
+        :class="[
+            'bg-white dark:bg-gray-800 antialiased transition-all duration-300',
+            { 'fixed top-0 left-0 right-0 z-50 shadow-md': isNavFixed },
+        ]"
+    >
         <div class="max-w-screen-xl px-4 mx-auto 2xl:px-0 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-8">
@@ -328,7 +330,7 @@ onUnmounted(() => {
                                 <polyline points="10 17 15 12 10 7" />
                                 <line x1="15" x2="3" y1="12" y2="12" />
                             </svg>
-                            Login
+                            <span class="hidden sm:block">Login</span>
                         </Link>
                         <Link
                             :href="route('register')"
@@ -354,7 +356,7 @@ onUnmounted(() => {
                                 <line x1="19" x2="19" y1="8" y2="14" />
                                 <line x1="22" x2="16" y1="11" y2="11" />
                             </svg>
-                            Register
+                            <span class="hidden sm:block">Register</span>
                         </Link>
                     </div>
 

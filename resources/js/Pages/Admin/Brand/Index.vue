@@ -8,7 +8,6 @@ import Edit from "./Edit.vue";
 const brandsPage = computed(() => usePage().props.brands);
 const brands = computed(() => brandsPage.value.data);
 
-
 // Pagination
 const changePage = (page) => {
     router.visit(`/admin/brands?page=${page}`, {
@@ -16,7 +15,6 @@ const changePage = (page) => {
         preserveScroll: true,
     });
 };
-
 
 // Edit Brand
 const editModalOpen = ref(false);
@@ -30,12 +28,10 @@ const openEditModal = (id) => {
 // Delete Brand
 const deleteBrand = async (id) => {
     try {
-        await router.delete("/admin/brands/" + id + "/destroy", {
+        router.delete("/admin/brands/" + id + "/destroy", {
             preserveScroll: true,
             onSuccess: () => {
-                brands.value = brands.value.filter(
-                    (brand) => brand.id !== id
-                );
+                brands.value = brands.value.filter((brand) => brand.id !== id);
             },
             onError: (error) => {
                 console.log(error);
@@ -61,16 +57,13 @@ const toggleAllCheckboxes = () => {
 const deleteAll = async () => {
     if (selectedBrands.value.length > 0) {
         try {
-            await router.delete(
-                "/admin/brands/" +
-                    selectedBrands.value +
-                    "/multiple/delete",
+            router.delete(
+                "/admin/brands/" + selectedBrands.value + "/multiple/delete",
                 {
                     preserveScroll: true,
                     onSuccess: () => {
                         brands.value = brands.value.filter(
-                            (brand) =>
-                                !selectedBrands.value.includes(brand.id)
+                            (brand) => !selectedBrands.value.includes(brand.id)
                         );
                         selectedBrands.value = [];
                         selectAll.value = false;
@@ -194,9 +187,7 @@ watch(selectedBrands, () => {
                                             >
                                         </div>
                                     </th>
-                                    <th scope="col" class="px-4 py-3">
-                                        Brand
-                                    </th>
+                                    <th scope="col" class="px-4 py-3">Brand</th>
                                     <th scope="col" class="px-4 py-3">
                                         Description
                                     </th>
@@ -233,15 +224,11 @@ watch(selectedBrands, () => {
                                     </td>
                                     <td
                                         scope="row"
-                                        class="px-4 py-2 font-medium text-gray-900  max-w-24 truncate dark:text-white"
+                                        class="px-4 py-2 font-medium text-gray-900 max-w-24 truncate dark:text-white"
                                     >
-                                        <div
-                                            class="flex items-center"
-                                        >
+                                        <div class="flex items-center">
                                             <img
-                                                v-if="
-                                                    brand.image
-                                                "
+                                                v-if="brand.image"
                                                 :src="`/storage/${brand.image}`"
                                                 :alt="brand.name"
                                                 class="w-8 h-8 mr-3 rounded-md object-contain"
@@ -252,7 +239,9 @@ watch(selectedBrands, () => {
                                                 :alt="brand.name"
                                                 class="w-8 h-8 mr-3 rounded-md object-contain"
                                             />
-                                            <span class="truncate">{{ brand.name }} </span>
+                                            <span class="truncate"
+                                                >{{ brand.name }}
+                                            </span>
                                         </div>
                                     </td>
                                     <td class="px-4 py-2 max-w-24 truncate">

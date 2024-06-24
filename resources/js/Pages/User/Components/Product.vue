@@ -1,5 +1,7 @@
 <script setup>
-import { router } from "@inertiajs/vue3";
+import { router, usePage } from "@inertiajs/vue3";
+import { computed, defineProps } from "vue";
+
 defineProps({
     products: {
         type: Object,
@@ -10,9 +12,11 @@ defineProps({
     },
 });
 
+const cartItems = computed(() => usePage().props.cartItems);
+
 const addToCart = async (product) => {
     try {
-        await router.post(
+        router.post(
             "/cart/add/" + product.id,
             {
                 product_id: product.id,
@@ -30,6 +34,49 @@ const addToCart = async (product) => {
         );
     } catch (error) {
         console.log(error);
+    }
+};
+
+const isProductInCart = (productId) => {
+    return cartItems.value.some((item) => item.product_id === productId);
+};
+
+const getProductQuantity = (productId) => {
+    const item = cartItems.value.find((item) => item.product_id === productId);
+    return item ? item.quantity : 0;
+};
+
+const updateQuantity = async (id, quantity) => {
+    try {
+        router.post(
+            `/cart/update/${id}/${quantity}`,
+            {
+                _method: "put",
+                quantity: quantity,
+                product_id: id,
+            },
+            {
+                preserveScroll: true,
+                onError: (error) => {
+                    console.error(error);
+                },
+            }
+        );
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+const removeItem = async (id) => {
+    try {
+        router.delete(`/cart/remove/${id}`, {
+            preserveScroll: true,
+            onError: (error) => {
+                console.error(error);
+            },
+        });
+    } catch (error) {
+        console.error(error);
     }
 };
 </script>
@@ -150,40 +197,113 @@ const addToCart = async (product) => {
                             >
                                 {{ product.price }}$
                             </p>
-                            
-                            <button
-                                type="button"
-                                class="inline-flex items-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                                @click="addToCart(product)"
-                                v-if="product.quantity > 0"
-                            >
-                                <svg
-                                    class="-ms-2 me-2 h-5 w-5"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6"
-                                    />
-                                </svg>
-                                Add to cart
-                            </button>
 
-                            <button
-                                v-else
-                                type="button"
-                                class="inline-flex items-center rounded-lg bg-gray-200 px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                            <div
+                                v-if="!isProductInCart(product.id)"
+                                class="flex items-center justify-end gap-1"
                             >
-                                Not available
-                            </button>
+                                <button
+                                    type="button"
+                                    class="inline-flex items-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                    @click="addToCart(product)"
+                                    v-if="product.quantity > 0"
+                                >
+                                    <svg
+                                        class="-ms-2 me-2 h-5 w-5"
+                                        aria-hidden="true"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke="currentColor"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6"
+                                        />
+                                    </svg>
+                                    Add to cart
+                                </button>
+
+                                <button
+                                    v-else
+                                    type="button"
+                                    class="inline-flex items-center rounded-lg bg-gray-200 px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                                >
+                                    Not available
+                                </button>
+                            </div>
+                            <div v-else class="flex items-center">
+                                <button
+                                    type="button"
+                                    id="decrement-button"
+                                    class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                                    @click="
+                                        getProductQuantity(product.id) === 1
+                                            ? removeItem(product.id)
+                                            : updateQuantity(
+                                                  product.id,
+                                                  getProductQuantity(
+                                                      product.id
+                                                  ) - 1
+                                              )
+                                    "
+                                >
+                                    <svg
+                                        class="h-2.5 w-2.5 text-gray-900 dark:text-white"
+                                        aria-hidden="true"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 18 2"
+                                    >
+                                        <path
+                                            stroke="currentColor"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M1 1h16"
+                                        />
+                                    </svg>
+                                </button>
+                                <input
+                                    type="text"
+                                    id="counter-input"
+                                    class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
+                                    disabled
+                                    :value="getProductQuantity(product.id)"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    id="increment-button"
+                                    class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                                    @click="
+                                        updateQuantity(
+                                            product.id,
+                                            getProductQuantity(product.id) + 1
+                                        )
+                                    "
+                                >
+                                    <svg
+                                        class="h-2.5 w-2.5 text-gray-900 dark:text-white"
+                                        aria-hidden="true"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 18 18"
+                                    >
+                                        <path
+                                            stroke="currentColor"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 1v16M1 9h16"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

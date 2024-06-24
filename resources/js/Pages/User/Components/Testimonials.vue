@@ -2,12 +2,12 @@
     <section class="bg-white dark:bg-gray-900">
         <div class="mx-auto max-w-screen-sm">
             <h2
-                class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
+                class="text-center mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
             >
                 Testimonials
             </h2>
             <p
-                class="mb-8 font-light text-gray-500 lg:mb-16 sm:text-xl dark:text-gray-400"
+                class="text-center mb-8 font-light text-gray-500 lg:mb-16 sm:text-xl dark:text-gray-400"
             >
                 Explore the whole collection of open-source web components and
                 elements built with the utility classes from Tailwind

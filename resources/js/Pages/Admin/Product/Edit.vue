@@ -78,7 +78,7 @@ const handleFileChange = (file) => {
 // Delete Single Image
 const deleteImage = async (id, index) => {
     try {
-        await router.delete("/admin/products/" + id + "/image/delete", {
+        router.delete("/admin/products/" + id + "/image/delete", {
             preserveScroll: true,
             onSuccess: () => {
                 formm.imagesViewOld.splice(index, 1);
@@ -96,7 +96,7 @@ const deleteImage = async (id, index) => {
 const FormSubmited = ref(false);
 const updateProduct = async () => {
     try {
-        await router.post(
+        router.post(
             "/admin/products/" + props.product.id + "/update",
             { _method: "put", ...formm },
             {

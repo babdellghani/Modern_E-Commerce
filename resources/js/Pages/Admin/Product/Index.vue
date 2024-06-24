@@ -8,7 +8,6 @@ import Edit from "./Edit.vue";
 const productsPage = computed(() => usePage().props.products);
 const products = computed(() => productsPage.value.data);
 
-
 // Pagination
 const changePage = (page) => {
     router.visit(`/admin/products?page=${page}`, {
@@ -26,7 +25,7 @@ const ChangePublished = async (id) => {
             products.value[productIndex].published =
                 !products.value[productIndex].published;
         }
-        await router.post(
+        router.post(
             "/admin/products/" + id + "/published",
             {},
             {
@@ -59,7 +58,7 @@ const openEditModal = (id) => {
 // Delete Product
 const deleteProduct = async (id) => {
     try {
-        await router.delete("/admin/products/" + id + "/destroy", {
+        router.delete("/admin/products/" + id + "/destroy", {
             preserveScroll: true,
             onSuccess: () => {
                 products.value = products.value.filter(
@@ -90,7 +89,7 @@ const toggleAllCheckboxes = () => {
 const deleteAll = async () => {
     if (selectedProducts.value.length > 0) {
         try {
-            await router.delete(
+            router.delete(
                 "/admin/products/" +
                     selectedProducts.value +
                     "/multiple/delete",
@@ -291,7 +290,9 @@ watch(selectedProducts, () => {
                                                 :alt="product.name"
                                                 class="w-8 h-8 mr-3 rounded-md object-contain"
                                             />
-                                            <span class="truncate">{{ product.name }} </span>
+                                            <span class="truncate"
+                                                >{{ product.name }}
+                                            </span>
                                         </div>
                                     </td>
                                     <td class="px-4 py-2">
@@ -300,8 +301,11 @@ watch(selectedProducts, () => {
                                             class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300"
                                             >{{ product.category.name }}</span
                                         >
-                                        <span v-else
-                                            class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-red-900 dark:text-red-300">No Category</span>
+                                        <span
+                                            v-else
+                                            class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-red-900 dark:text-red-300"
+                                            >No Category</span
+                                        >
                                     </td>
                                     <td class="px-4 py-2">
                                         <span
@@ -309,8 +313,11 @@ watch(selectedProducts, () => {
                                             class="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-purple-900 dark:text-purple-300"
                                             >{{ product.brand.name }}</span
                                         >
-                                        <span v-else
-                                            class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-red-900 dark:text-red-300">No Brand</span>
+                                        <span
+                                            v-else
+                                            class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded dark:bg-red-900 dark:text-red-300"
+                                            >No Brand</span
+                                        >
                                     </td>
                                     <td
                                         class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white"

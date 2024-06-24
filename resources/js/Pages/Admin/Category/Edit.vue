@@ -36,7 +36,9 @@ watch(
             formm.slug = newCategory.slug;
             formm.description = newCategory.description;
             formm.image = null;
-            imagePreview.value = newCategory.image ? '/storage/' + newCategory.image : null;
+            imagePreview.value = newCategory.image
+                ? "/storage/" + newCategory.image
+                : null;
         }
     },
     { deep: true }
@@ -63,7 +65,7 @@ const slugify = (text) => {
 const FormSubmited = ref(false);
 const updateCategory = async () => {
     try {
-        await router.post(
+        router.post(
             "/admin/categories/" + props.category.id + "/update",
             { _method: "put", ...formm },
             {
