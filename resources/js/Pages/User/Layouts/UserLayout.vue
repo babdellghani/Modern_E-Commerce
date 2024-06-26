@@ -20,7 +20,7 @@ onMounted(() => {
 
 <template>
     <Head :title="title" />
-    <div class="antialiased bg-gray-50 dark:bg-gray-900 min-h-screen">
+    <div class="antialiased bg-white dark:bg-gray-900 min-h-screen">
         <!-- Header -->
         <Header />
 

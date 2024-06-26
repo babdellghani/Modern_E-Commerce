@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\User\ProductViewController;
 use App\Http\Controllers\User\UserDashboardController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -17,6 +18,10 @@ Route::prefix('cart')->controller(CartController::class)->group(function () {
     Route::post('/add/{product}', 'store')->name('cart.store');
     Route::put('/update/{product}/{quantity}', 'update')->name('cart.update');
     Route::delete('/remove/{product}', 'destroy')->name('cart.destroy');
+});
+Route::prefix('products')->controller(ProductViewController::class)->group(function () {
+    Route::get('/', 'index')->name('products.index');
+    Route::get('/{product}', 'show')->name('products.show');
 });
 
 // Auth

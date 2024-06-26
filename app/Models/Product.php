@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -31,5 +32,16 @@ class Product extends Model
     public function CartItems()
     {
         return $this->hasMany(CartItem::class);
+    }
+
+    public function scopedFilers(Builder $query)
+    {
+        return $query->when(request('search'), function ($query) {
+            return $query->where('name', 'like', '%' . request('search') . '%');
+        })->when(request('category'), function ($query) {
+            return $query->where('category_id', request('category'));
+        })->when(request('brand'), function ($query) {
+            return $query->where('brand_id', request('brand'));
+        });
     }
 }
