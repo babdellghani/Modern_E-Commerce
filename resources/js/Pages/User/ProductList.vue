@@ -1,67 +1,122 @@
 <script setup>
 import UserLayout from "./Layouts/UserLayout.vue";
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from "vue";
 import {
-  Dialog,
-  DialogPanel,
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-  TransitionChild,
-  TransitionRoot,
-} from '@headlessui/vue'
-import { XMarkIcon } from '@heroicons/vue/24/outline'
-import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon } from '@heroicons/vue/20/solid'
-import Product from './Components/Product.vue'
-import { usePage } from "@inertiajs/vue3";
+    Dialog,
+    DialogPanel,
+    Disclosure,
+    DisclosureButton,
+    DisclosurePanel,
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuItems,
+    TransitionChild,
+    TransitionRoot,
+} from "@headlessui/vue";
+import { XMarkIcon } from "@heroicons/vue/24/outline";
+import {
+    ChevronDownIcon,
+    FunnelIcon,
+    MinusIcon,
+    PlusIcon,
+    Squares2X2Icon,
+} from "@heroicons/vue/20/solid";
+import Product from "./Components/Product.vue";
+import { Link, useForm, usePage } from "@inertiajs/vue3";
 
 const productsPage = computed(() => usePage().props.products);
 const products = computed(() => productsPage.value.data);
 const categories = computed(() => usePage().props.categories);
 const brands = computed(() => usePage().props.brands);
 
-console.log((brands.value).map((brand) => ({
-        value: brand.id,
-        label: brand.name,
-        checked: false
-    })));
+const filtersForm = useForm({
+    category: [],
+    brand: [],
+    sort: "",
+    order: "",
+    search: "",
+    price: { min: "", max: "" },
+});
 
 const sortOptions = [
-  { name: 'Most Popular', href: '#', current: true },
-  { name: 'Best Rating', href: '#', current: false },
-  { name: 'Newest', href: '#', current: false },
-  { name: 'Price: Low to High', href: '#', current: false },
-  { name: 'Price: High to Low', href: '#', current: false },
-]
+    { name: "Newest", href: "?sort=created_at&order=desc", current: false },
+    { name: "Oldest", href: "?sort=created_at&order=asc", current: false },
+    {
+        name: "Price: Low to High",
+        href: "?sort=price&order=asc",
+        current: false,
+    },
+    {
+        name: "Price: High to Low",
+        href: "?sort=price&order=desc",
+        current: false,
+    },
+];
 const subCategories = [
-  { name: 'Totes', href: '#' },
-  { name: 'Backpacks', href: '#' },
-  { name: 'Travel Bags', href: '#' },
-  { name: 'Hip Bags', href: '#' },
-  { name: 'Laptop Sleeves', href: '#' },
-]
+    { name: "Totes", href: "#" },
+    { name: "Backpacks", href: "#" },
+    { name: "Travel Bags", href: "#" },
+    { name: "Hip Bags", href: "#" },
+    { name: "Laptop Sleeves", href: "#" },
+];
 const filters = [
-  {
-    id: 'category',
-    name: 'Category',
-    options: [ categories.value ].flat(),
-  },
-  {
-    id: 'brand',
-    name: 'Brand',
-    options:  (brands.value).map((brand) => ({
-        value: brand.id,
-        label: brand.name,
-        checked: false
-    })) ,
-  },
-]
+    {
+        id: "category",
+        name: "Category",
+        options: categories.value.map((category) => ({
+            value: category.id,
+            label: category.name,
+            checked: false,
+        })),
+    },
+    {
+        id: "brand",
+        name: "Brand",
+        options: brands.value.map((brand) => ({
+            value: brand.id,
+            label: brand.name,
+            checked: false,
+        })),
+    },
+];
 
-const mobileFiltersOpen = ref(false)
+const mobileFiltersOpen = ref(false);
+
+const minprice = ref(0);
+const maxprice = ref(1000);
+const min = ref(0);
+const max = ref(1000);
+const minthumb = ref(0);
+const maxthumb = ref(0);
+
+function mintrigger() {
+  minprice.value = Math.min(minprice.value, maxprice.value - 100);
+  minthumb.value = ((minprice.value - min.value) / (max.value - min.value)) * 100;
+}
+
+function maxtrigger() {
+  maxprice.value = Math.max(maxprice.value, minprice.value + 100);
+  maxthumb.value = 100 - (((maxprice.value - min.value) / (max.value - min.value)) * 100);
+}
+
+onMounted(() => {
+  mintrigger();
+  maxtrigger();
+});
+
+const changePrice = () => {
+  filtersForm.price.min = minprice.value;
+  filtersForm.price.max = maxprice.value;
+  filtersForm.transform((data)=>({
+    ...data,
+    price: [data.price.min, data.price.max],
+  })).get('products', {
+    preserveState: true,
+    replace: true,
+  }
+  );
+}
 </script>
 
 <template>
@@ -124,22 +179,41 @@ const mobileFiltersOpen = ref(false)
 
                                     <!-- Filters -->
                                     <form class="mt-4 border-t border-gray-200">
-                                        <h3 class="sr-only">Categories</h3>
-                                        <ul
-                                            role="list"
-                                            class="px-2 py-3 font-medium text-gray-900"
-                                        >
-                                            <li
-                                                v-for="category in subCategories"
-                                                :key="category.name"
+                                        <h3 class="sr-only">Price</h3>
+
+                                        <form class="px-4 py-6 pb-12 mx-auto">
+                                            <h3
+                                                class="font-medium text-gray-900"
                                             >
-                                                <a
-                                                    :href="category.href"
-                                                    class="block px-2 py-3"
-                                                    >{{ category.name }}</a
+                                                Price:
+                                                <span class="text-gray-500"
+                                                    >1000$</span
                                                 >
-                                            </li>
-                                        </ul>
+                                            </h3>
+                                            <div class="relative">
+                                                <label
+                                                    for="price-range-input"
+                                                    class="sr-only"
+                                                    >Default range</label
+                                                >
+                                                <input
+                                                    id="price-range-input"
+                                                    type="range"
+                                                    value="1000"
+                                                    min="100"
+                                                    max="1500"
+                                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                                                />
+                                                <span
+                                                    class="text-sm text-gray-500 dark:text-gray-400 absolute start-0 -bottom-6"
+                                                    >Min ($100)</span
+                                                >
+                                                <span
+                                                    class="text-sm text-gray-500 dark:text-gray-400 absolute end-0 -bottom-6"
+                                                    >Max ($1500)</span
+                                                >
+                                            </div>
+                                        </form>
 
                                         <Disclosure
                                             as="div"
@@ -257,7 +331,7 @@ const mobileFiltersOpen = ref(false)
                                                 :key="option.name"
                                                 v-slot="{ active }"
                                             >
-                                                <a
+                                                <Link
                                                     :href="option.href"
                                                     :class="[
                                                         option.current
@@ -268,7 +342,7 @@ const mobileFiltersOpen = ref(false)
                                                             : '',
                                                         'block px-4 py-2 text-sm',
                                                     ]"
-                                                    >{{ option.name }}</a
+                                                    >{{ option.name }}</Link
                                                 >
                                             </MenuItem>
                                         </div>
@@ -311,20 +385,90 @@ const mobileFiltersOpen = ref(false)
                         >
                             <!-- Filters -->
                             <form class="hidden lg:block">
-                                <h3 class="sr-only">Categories</h3>
-                                <ul
+                                <div
                                     role="list"
                                     class="space-y-4 border-b border-gray-200 pb-6 text-sm font-medium text-gray-900"
                                 >
-                                    <li
-                                        v-for="category in subCategories"
-                                        :key="category.name"
+                                    <h3 class="font-medium text-gray-900">
+                                        Price:
+                                        <span class="text-gray-500">{{ minprice }}$ - {{ maxprice }}$</span>
+                                    </h3>
+
+                                    <!-- Muli Range -->
+                                    <div class="relative">
+                                        <input
+                                            type="range"
+                                            step="10"
+                                            :min="min"
+                                            :max="max"
+                                            @input="mintrigger"
+                                            v-model="minprice"
+                                            @change="changePrice"
+                                            class="absolute pointer-events-none appearance-none z-20 h-2 w-full opacity-0 cursor-pointer"
+                                        />
+
+                                        <input
+                                            type="range"
+                                            step="10"
+                                            :min="min"
+                                            :max="max"
+                                            @input="maxtrigger"
+                                            v-model="maxprice"
+                                            @change="changePrice"
+                                            class="absolute pointer-events-none appearance-none z-20 h-2 w-full opacity-0 cursor-pointer"
+                                        />
+
+                                        <div class="relative z-10 h-2">
+                                            <div
+                                                class="absolute z-10 left-0 right-0 bottom-0 top-0 rounded-md bg-gray-200"
+                                            ></div>
+                                            <div
+                                                class="absolute z-20 top-0 bottom-0 rounded-md bg-blue-300"
+                                                :style="{
+                                                    right: maxthumb + '%',
+                                                    left: minthumb + '%',
+                                                }"
+                                            ></div>
+                                            <div
+                                                class="absolute z-30 w-6 h-6 top-0 left-0 bg-blue-300 rounded-full -mt-2 -ml-1"
+                                                :style="{
+                                                    left: minthumb + '%',
+                                                }"
+                                            ></div>
+                                            <div
+                                                class="absolute z-30 w-6 h-6 top-0 right-0 bg-blue-300 rounded-full -mt-2 -mr-3"
+                                                :style="{
+                                                    right: maxthumb + '%',
+                                                }"
+                                            ></div>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="flex justify-between items-center py-5"
                                     >
-                                        <a :href="category.href">{{
-                                            category.name
-                                        }}</a>
-                                    </li>
-                                </ul>
+                                        <div>
+                                            <input
+                                                type="text"
+                                                maxlength="5"
+                                                @input="mintrigger"
+                                                v-model="minprice"
+                                                :min="min"
+                                                class="px-3 py-2 border border-gray-200 rounded w-24 text-center"
+                                            />
+                                        </div>
+                                        <div>
+                                            <input
+                                                type="text"
+                                                maxlength="5"
+                                                @input="maxtrigger"
+                                                v-model="maxprice"
+                                                :max="max"
+                                                class="px-3 py-2 border border-gray-200 rounded w-24 text-center"
+                                            />
+                                        </div>
+                                    </div>
+                                    <!-- End Muli Range -->
+                                </div>
 
                                 <Disclosure
                                     as="div"
@@ -387,7 +531,10 @@ const mobileFiltersOpen = ref(false)
 
                             <!-- Product grid -->
                             <div class="lg:col-span-3">
-                                <Product :products="products" :productsPage="productsPage" />
+                                <Product
+                                    :products="products"
+                                    :productsPage="productsPage"
+                                />
                             </div>
                         </div>
                     </section>
@@ -396,3 +543,12 @@ const mobileFiltersOpen = ref(false)
         </div>
     </UserLayout>
 </template>
+
+<style scoped>
+input[type="range"]::-webkit-slider-thumb {
+    pointer-events: all;
+    width: 24px;
+    height: 24px;
+    -webkit-appearance: none;
+}
+</style>

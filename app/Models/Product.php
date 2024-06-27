@@ -23,7 +23,7 @@ class Product extends Model
     {
         return $this->belongsTo(Brand::class);
     }
-    
+
     public function images()
     {
         return $this->hasMany(ProductImage::class);
@@ -34,7 +34,7 @@ class Product extends Model
         return $this->hasMany(CartItem::class);
     }
 
-    public function scopedFilers(Builder $query)
+    public function scopeFilters(Builder $query)
     {
         return $query->when(request('search'), function ($query) {
             return $query->where('name', 'like', '%' . request('search') . '%');
@@ -42,6 +42,18 @@ class Product extends Model
             return $query->where('category_id', request('category'));
         })->when(request('brand'), function ($query) {
             return $query->where('brand_id', request('brand'));
+        })->when(request('price'), function ($query) {
+            return $query->whereBetween(
+                'price',
+                [request('price')[0], request('price')[1]]
+            );
+        });
+    }
+
+    public function scopeSortBy(Builder $query)
+    {
+        return $query->when(request('sort'), function ($query) {
+            return $query->orderBy(request('sort'), request('order'));
         });
     }
 }

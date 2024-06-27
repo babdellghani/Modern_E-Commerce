@@ -1,5 +1,17 @@
 <script setup>
-import { Link } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
+import { computed } from "vue";
+
+const page = usePage();
+
+const isProductsOpen = computed(() => {
+    const url = page.url;
+    return (
+        url.startsWith("/admin/products") ||
+        url.startsWith("/admin/categories") ||
+        url.startsWith("/admin/brands")
+    );
+});
 </script>
 
 <template>
@@ -42,10 +54,18 @@ import { Link } from "@inertiajs/vue3";
                     <Link
                         :href="route('admin.dashboard')"
                         class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+                        :class="{
+                            'bg-gray-100 dark:bg-gray-700':
+                                $page.url.startsWith('/admin/dashboard'),
+                        }"
                     >
                         <svg
                             aria-hidden="true"
                             class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                            :class="{
+                                'text-gray-900 dark:text-white':
+                                    $page.url.startsWith('/admin/dashboard'),
+                            }"
                             fill="currentColor"
                             viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg"
@@ -64,12 +84,24 @@ import { Link } from "@inertiajs/vue3";
                     <button
                         type="button"
                         class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                        :class="{
+                            'bg-gray-100 dark:bg-gray-700':
+                                $page.url.startsWith('/admin/products') ||
+                                $page.url.startsWith('/admin/categories') ||
+                                $page.url.startsWith('/admin/brands'),
+                        }"
                         aria-controls="dropdown-pages"
                         data-collapse-toggle="dropdown-pages"
                     >
                         <svg
                             aria-hidden="true"
                             class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
+                            :class="{
+                                'text-gray-900 dark:text-white':
+                                    $page.url.startsWith('/admin/products') ||
+                                    $page.url.startsWith('/admin/categories') ||
+                                    $page.url.startsWith('/admin/brands'),
+                            }"
                             fill="currentColor"
                             viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg"
@@ -97,25 +129,52 @@ import { Link } from "@inertiajs/vue3";
                             ></path>
                         </svg>
                     </button>
-                    <ul id="dropdown-pages" class="hidden py-2 space-y-2">
+                    <ul
+                        id="dropdown-pages"
+                        class="py-2 space-y-2"
+                        :class="{
+                            'block': isProductsOpen,
+                            'hidden': !isProductsOpen,
+                        }"
+                    >
                         <li>
                             <Link
+                                preserve-state
+                                replace
                                 :href="route('admin.products.index')"
                                 class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                                :class="{
+                                    'bg-gray-100 dark:bg-gray-700':
+                                        $page.url.startsWith('/admin/products'),
+                                }"
                                 >Product</Link
                             >
                         </li>
                         <li>
                             <Link
+                                preserve-state
+                                replace
                                 :href="route('admin.brands.index')"
                                 class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                                :class="{
+                                    'bg-gray-100 dark:bg-gray-700':
+                                        $page.url.startsWith('/admin/brands'),
+                                }"
                                 >Brand</Link
                             >
                         </li>
                         <li>
                             <Link
+                                preserve-state
+                                replace
                                 :href="route('admin.categories.index')"
                                 class="flex items-center p-2 pl-11 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                                :class="{
+                                    'bg-gray-100 dark:bg-gray-700':
+                                        $page.url.startsWith(
+                                            '/admin/categories'
+                                        ),
+                                }"
                                 >Category</Link
                             >
                         </li>

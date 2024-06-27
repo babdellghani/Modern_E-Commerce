@@ -14,7 +14,10 @@ class ProductViewController extends Controller
 {
     public function index()
     {
-        $products = Product::where('published', 1)->with('category', 'brand', 'images')->latest()->paginate(12);
+        $products = Product::where('published', 1)->with('category', 'brand', 'images');
+        $products = $products->Filters()->SortBy()->paginate(12);
+
+
         $barnds = Brand::whereHas('products', function ($query) {
             $query->where('published', 1);
         })->get();

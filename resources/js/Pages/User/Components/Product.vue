@@ -82,7 +82,7 @@ const removeItem = async (id) => {
 // Pagination
 const changePage = (page) => {
     router.visit(`/products?page=${page}`, {
-        preserveState: false,
+        preserveState: true,
         preserveScroll: false,
     });
 };
@@ -90,8 +90,8 @@ const changePage = (page) => {
 
 <template>
     <div
-        class="bg-white dark:bg-gray-900 mb-4 grid gap-4 sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4"
-        :class="{'sm:grid-cols-2 md:mb-8 lg:grid-cols-2 xl:grid-cols-3' : productsPage }"
+        class="bg-white dark:bg-gray-900 mb-4 grid gap-4"
+        :class="productsPage ? 'sm:grid-cols-2 md:mb-8 lg:grid-cols-2 xl:grid-cols-3' : 'sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4'"
     >
         <div
             v-for="product in products"
