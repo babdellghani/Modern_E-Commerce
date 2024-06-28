@@ -56,4 +56,13 @@ class Product extends Model
             return $query->orderBy(request('sort'), request('order'));
         });
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($product) {
+            $product->CartItems()->delete();
+        });
+    }
 }
