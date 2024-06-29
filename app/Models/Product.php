@@ -39,9 +39,9 @@ class Product extends Model
         return $query->when(request('search'), function ($query) {
             return $query->where('name', 'like', '%' . request('search') . '%');
         })->when(request('category'), function ($query) {
-            return $query->where('category_id', request('category'));
+            return $query->whereIn('category_id', request('category'));
         })->when(request('brand'), function ($query) {
-            return $query->where('brand_id', request('brand'));
+            return $query->whereIn('brand_id', request('brand'));
         })->when(request('price'), function ($query) {
             return $query->whereBetween(
                 'price',

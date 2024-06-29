@@ -1,6 +1,6 @@
 <script setup>
 import UserLayout from "./Layouts/UserLayout.vue";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import {
     Dialog,
     DialogPanel,
@@ -23,21 +23,15 @@ import {
     Squares2X2Icon,
 } from "@heroicons/vue/20/solid";
 import Product from "./Components/Product.vue";
-import { Link, useForm, usePage } from "@inertiajs/vue3";
+import { Link, router, usePage } from "@inertiajs/vue3";
 
 const productsPage = computed(() => usePage().props.products);
 const products = computed(() => productsPage.value.data);
 const categories = computed(() => usePage().props.categories);
 const brands = computed(() => usePage().props.brands);
 
-const filtersForm = useForm({
-    category: [],
-    brand: [],
-    sort: "",
-    order: "",
-    search: "",
-    price: { min: "", max: "" },
-});
+const selectedCategory = ref([]);
+const selectedBrand = ref([]);
 
 const sortOptions = [
     { name: "Newest", href: "?sort=created_at&order=desc", current: false },
@@ -53,36 +47,10 @@ const sortOptions = [
         current: false,
     },
 ];
-const subCategories = [
-    { name: "Totes", href: "#" },
-    { name: "Backpacks", href: "#" },
-    { name: "Travel Bags", href: "#" },
-    { name: "Hip Bags", href: "#" },
-    { name: "Laptop Sleeves", href: "#" },
-];
-const filters = [
-    {
-        id: "category",
-        name: "Category",
-        options: categories.value.map((category) => ({
-            value: category.id,
-            label: category.name,
-            checked: false,
-        })),
-    },
-    {
-        id: "brand",
-        name: "Brand",
-        options: brands.value.map((brand) => ({
-            value: brand.id,
-            label: brand.name,
-            checked: false,
-        })),
-    },
-];
 
 const mobileFiltersOpen = ref(false);
 
+// Filter price
 const minprice = ref(0);
 const maxprice = ref(1000);
 const min = ref(0);
@@ -91,32 +59,119 @@ const minthumb = ref(0);
 const maxthumb = ref(0);
 
 function mintrigger() {
-  minprice.value = Math.min(minprice.value, maxprice.value - 100);
-  minthumb.value = ((minprice.value - min.value) / (max.value - min.value)) * 100;
+    minprice.value = Math.min(minprice.value, maxprice.value - 100);
+    minthumb.value =
+        ((minprice.value - min.value) / (max.value - min.value)) * 100;
 }
 
 function maxtrigger() {
-  maxprice.value = Math.max(maxprice.value, minprice.value + 100);
-  maxthumb.value = 100 - (((maxprice.value - min.value) / (max.value - min.value)) * 100);
+    maxprice.value = Math.max(maxprice.value, minprice.value + 100);
+    maxthumb.value =
+        100 - ((maxprice.value - min.value) / (max.value - min.value)) * 100;
 }
+
+const initializeFromURL = () => {
+    const params = new URLSearchParams(window.location.search);
+
+    // Handle category
+    selectedCategory.value = Array.from(params.entries())
+        .filter(([key]) => key.startsWith("category["))
+        .map(([, value]) => Number(value));
+
+    // Handle brand
+    selectedBrand.value = Array.from(params.entries())
+        .filter(([key]) => key.startsWith("brand["))
+        .map(([, value]) => Number(value));
+
+    // Handle price
+    const minPriceParam = params.get("price[0]");
+    const maxPriceParam = params.get("price[1]");
+    if (minPriceParam !== null && maxPriceParam !== null) {
+        minprice.value = Number(minPriceParam);
+        maxprice.value = Number(maxPriceParam);
+        mintrigger();
+        maxtrigger();
+    }
+
+    console.log("Category:", selectedCategory.value);
+    console.log("Price:", [minprice.value, maxprice.value]);
+};
 
 onMounted(() => {
-  mintrigger();
-  maxtrigger();
+    mintrigger();
+    maxtrigger();
+    initializeFromURL();
 });
 
-const changePrice = () => {
-  filtersForm.price.min = minprice.value;
-  filtersForm.price.max = maxprice.value;
-  filtersForm.transform((data)=>({
-    ...data,
-    price: [data.price.min, data.price.max],
-  })).get('products', {
-    preserveState: true,
-    replace: true,
-  }
-  );
-}
+// Filter category and brand
+watch([selectedCategory, selectedBrand, minprice, maxprice], () => {
+    applyFilters();
+});
+
+// // Filter sort
+// watch([filtersForm.sort, filtersForm.order], () => {
+//     filtersForm
+//         .transform((data) => ({
+//             ...data,
+//             sort: filtersForm.sort,
+//             order: filtersForm.order,
+//         }))
+//         .get("products", {
+//             preserveState: true,
+//             replace: true,
+//         });
+// });
+
+// // Filter search
+// watch(filtersForm.search, () => {
+//     filtersForm
+//         .transform((data) => ({
+//             ...data,
+//             search: filtersForm.search,
+//         }))
+//         .get("products", {
+//             preserveState: true,
+//             replace: true,
+//         });
+// });
+
+// // Reset filters
+// const resetFilters = () => {
+//     filtersForm.reset();
+//     selectedCategory.value = [];
+//     selectedBrand.value = [];
+//     filtersForm
+//         .transform((data) => ({
+//             ...data,
+//             category: selectedCategory.value,
+//             brand: selectedBrand.value,
+//         }))
+//         .get("products", {
+//             preserveState: true,
+//             replace: true,
+//         });
+// };
+
+// const clearFilters = () => {
+//     resetFilters();
+//     mintrigger();
+//     maxtrigger();
+// };
+
+const applyFilters = () => {
+    router.get(
+        "products",
+        {
+            category: selectedCategory.value,
+            brand: selectedBrand.value,
+            price: [minprice.value, maxprice.value],
+        },
+        {
+            preserveState: true,
+            replace: true,
+        }
+    );
+};
 </script>
 
 <template>
@@ -178,59 +233,123 @@ const changePrice = () => {
                                     </div>
 
                                     <!-- Filters -->
-                                    <form class="mt-4 border-t border-gray-200">
-                                        <h3 class="sr-only">Price</h3>
-
-                                        <form class="px-4 py-6 pb-12 mx-auto">
+                                    <form
+                                        class="mt-4 px-6 border-t border-gray-200"
+                                    >
+                                        <!-- Filters -->
+                                        <!-- Muli Range Price -->
+                                        <div
+                                            role="list"
+                                            class="space-y-4 border-b border-gray-200 pt-6 text-sm font-medium text-gray-900"
+                                        >
                                             <h3
                                                 class="font-medium text-gray-900"
                                             >
                                                 Price:
                                                 <span class="text-gray-500"
-                                                    >1000$</span
+                                                    >{{ minprice }}$ -
+                                                    {{ maxprice }}$</span
                                                 >
                                             </h3>
-                                            <div class="relative">
-                                                <label
-                                                    for="price-range-input"
-                                                    class="sr-only"
-                                                    >Default range</label
-                                                >
-                                                <input
-                                                    id="price-range-input"
-                                                    type="range"
-                                                    value="1000"
-                                                    min="100"
-                                                    max="1500"
-                                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-                                                />
-                                                <span
-                                                    class="text-sm text-gray-500 dark:text-gray-400 absolute start-0 -bottom-6"
-                                                    >Min ($100)</span
-                                                >
-                                                <span
-                                                    class="text-sm text-gray-500 dark:text-gray-400 absolute end-0 -bottom-6"
-                                                    >Max ($1500)</span
-                                                >
-                                            </div>
-                                        </form>
 
+                                            <div class="relative">
+                                                <input
+                                                    type="range"
+                                                    step="10"
+                                                    :min="min"
+                                                    :max="max"
+                                                    @input="mintrigger"
+                                                    v-model="minprice"
+                                                    class="absolute pointer-events-none appearance-none z-20 h-2 w-full opacity-0 cursor-pointer"
+                                                />
+
+                                                <input
+                                                    type="range"
+                                                    step="10"
+                                                    :min="min"
+                                                    :max="max"
+                                                    @input="maxtrigger"
+                                                    v-model="maxprice"
+                                                    class="absolute pointer-events-none appearance-none z-20 h-2 w-full opacity-0 cursor-pointer"
+                                                />
+
+                                                <div class="relative z-10 h-2">
+                                                    <div
+                                                        class="absolute z-10 left-0 right-0 bottom-0 top-0 rounded-md bg-gray-200"
+                                                    ></div>
+                                                    <div
+                                                        class="absolute z-20 top-0 bottom-0 rounded-md bg-blue-400"
+                                                        :style="{
+                                                            right:
+                                                                maxthumb + '%',
+                                                            left:
+                                                                minthumb + '%',
+                                                        }"
+                                                    ></div>
+                                                    <div
+                                                        class="absolute z-30 w-6 h-6 top-0 left-0 bg-blue-500 rounded-full -mt-2 -ml-1"
+                                                        :style="{
+                                                            left:
+                                                                minthumb + '%',
+                                                        }"
+                                                    ></div>
+                                                    <div
+                                                        class="absolute z-30 w-6 h-6 top-0 right-0 bg-blue-500 rounded-full -mt-2 -mr-3"
+                                                        :style="{
+                                                            right:
+                                                                maxthumb + '%',
+                                                        }"
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="flex justify-between items-center py-5"
+                                            >
+                                                <div>
+                                                    <input
+                                                        type="text"
+                                                        :maxlength="
+                                                            max.toString()
+                                                                .length
+                                                        "
+                                                        @input="mintrigger"
+                                                        v-model="minprice"
+                                                        :min="min"
+                                                        :max="max"
+                                                        class="px-3 py-2 border border-gray-200 rounded w-24 text-center"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <input
+                                                        type="text"
+                                                        :maxlength="
+                                                            max.toString()
+                                                                .length
+                                                        "
+                                                        @input="maxtrigger"
+                                                        v-model="maxprice"
+                                                        :min="min"
+                                                        :max="max"
+                                                        class="px-3 py-2 border border-gray-200 rounded w-24 text-center"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- End Muli Range -->
+
+                                        <!-- Category -->
                                         <Disclosure
                                             as="div"
-                                            v-for="section in filters"
-                                            :key="section.id"
-                                            class="border-t border-gray-200 px-4 py-6"
+                                            class="border-b border-gray-200 py-6"
                                             v-slot="{ open }"
                                         >
-                                            <h3 class="-mx-2 -my-3 flow-root">
+                                            <h3 class="-my-3 flow-root">
                                                 <DisclosureButton
-                                                    class="flex w-full items-center justify-between bg-white px-2 py-3 text-gray-400 hover:text-gray-500"
+                                                    class="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500"
                                                 >
                                                     <span
                                                         class="font-medium text-gray-900"
-                                                        >{{
-                                                            section.name
-                                                        }}</span
+                                                        >Category</span
                                                     >
                                                     <span
                                                         class="ml-6 flex items-center"
@@ -249,37 +368,94 @@ const changePrice = () => {
                                                 </DisclosureButton>
                                             </h3>
                                             <DisclosurePanel class="pt-6">
-                                                <div class="space-y-6">
+                                                <div class="space-y-4">
                                                     <div
-                                                        v-for="(
-                                                            option, optionIdx
-                                                        ) in section.options"
-                                                        :key="option.value"
+                                                        v-for="category in categories"
+                                                        :key="category.id"
                                                         class="flex items-center"
                                                     >
                                                         <input
-                                                            :id="`filter-mobile-${section.id}-${optionIdx}`"
-                                                            :name="`${section.id}[]`"
-                                                            :value="
-                                                                option.value
-                                                            "
+                                                            :id="`filter-${category.name}`"
+                                                            :name="`${category.name}[]`"
+                                                            :value="category.id"
                                                             type="checkbox"
-                                                            :checked="
-                                                                option.checked
+                                                            v-model="
+                                                                selectedCategory
                                                             "
                                                             class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                                         />
                                                         <label
-                                                            :for="`filter-mobile-${section.id}-${optionIdx}`"
-                                                            class="ml-3 min-w-0 flex-1 text-gray-500"
+                                                            :for="`filter-${category.name}`"
+                                                            class="ml-3 text-sm text-gray-600"
                                                             >{{
-                                                                option.label
+                                                                category.name
                                                             }}</label
                                                         >
                                                     </div>
                                                 </div>
                                             </DisclosurePanel>
                                         </Disclosure>
+                                        <!-- End Category -->
+
+                                        <!-- Brand -->
+                                        <Disclosure
+                                            as="div"
+                                            class="border-b border-gray-200 py-6"
+                                            v-slot="{ open }"
+                                        >
+                                            <h3 class="-my-3 flow-root">
+                                                <DisclosureButton
+                                                    class="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500"
+                                                >
+                                                    <span
+                                                        class="font-medium text-gray-900"
+                                                        >Brand</span
+                                                    >
+                                                    <span
+                                                        class="ml-6 flex items-center"
+                                                    >
+                                                        <PlusIcon
+                                                            v-if="!open"
+                                                            class="h-5 w-5"
+                                                            aria-hidden="true"
+                                                        />
+                                                        <MinusIcon
+                                                            v-else
+                                                            class="h-5 w-5"
+                                                            aria-hidden="true"
+                                                        />
+                                                    </span>
+                                                </DisclosureButton>
+                                            </h3>
+                                            <DisclosurePanel class="pt-6">
+                                                <div class="space-y-4">
+                                                    <div
+                                                        v-for="brand in brands"
+                                                        :key="brand.id"
+                                                        class="flex items-center"
+                                                    >
+                                                        <input
+                                                            :id="`filter-${brand.name}`"
+                                                            :name="`${brand.name}[]`"
+                                                            :value="brand.id"
+                                                            type="checkbox"
+                                                            v-model="
+                                                                selectedBrand
+                                                            "
+                                                            class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                                        />
+                                                        <label
+                                                            :for="`filter-${brand.name}`"
+                                                            class="ml-3 text-sm text-gray-600"
+                                                            >{{
+                                                                brand.name
+                                                            }}</label
+                                                        >
+                                                    </div>
+                                                </div>
+                                            </DisclosurePanel>
+                                        </Disclosure>
+                                        <!-- End Brand -->
                                     </form>
                                 </DialogPanel>
                             </TransitionChild>
@@ -385,16 +561,19 @@ const changePrice = () => {
                         >
                             <!-- Filters -->
                             <form class="hidden lg:block">
+                                <!-- Muli Range Price -->
                                 <div
                                     role="list"
-                                    class="space-y-4 border-b border-gray-200 pb-6 text-sm font-medium text-gray-900"
+                                    class="space-y-4 border-b border-gray-200 text-sm font-medium text-gray-900"
                                 >
                                     <h3 class="font-medium text-gray-900">
                                         Price:
-                                        <span class="text-gray-500">{{ minprice }}$ - {{ maxprice }}$</span>
+                                        <span class="text-gray-500"
+                                            >{{ minprice }}$ -
+                                            {{ maxprice }}$</span
+                                        >
                                     </h3>
 
-                                    <!-- Muli Range -->
                                     <div class="relative">
                                         <input
                                             type="range"
@@ -403,7 +582,6 @@ const changePrice = () => {
                                             :max="max"
                                             @input="mintrigger"
                                             v-model="minprice"
-                                            @change="changePrice"
                                             class="absolute pointer-events-none appearance-none z-20 h-2 w-full opacity-0 cursor-pointer"
                                         />
 
@@ -414,7 +592,6 @@ const changePrice = () => {
                                             :max="max"
                                             @input="maxtrigger"
                                             v-model="maxprice"
-                                            @change="changePrice"
                                             class="absolute pointer-events-none appearance-none z-20 h-2 w-full opacity-0 cursor-pointer"
                                         />
 
@@ -423,20 +600,20 @@ const changePrice = () => {
                                                 class="absolute z-10 left-0 right-0 bottom-0 top-0 rounded-md bg-gray-200"
                                             ></div>
                                             <div
-                                                class="absolute z-20 top-0 bottom-0 rounded-md bg-blue-300"
+                                                class="absolute z-20 top-0 bottom-0 rounded-md bg-blue-400"
                                                 :style="{
                                                     right: maxthumb + '%',
                                                     left: minthumb + '%',
                                                 }"
                                             ></div>
                                             <div
-                                                class="absolute z-30 w-6 h-6 top-0 left-0 bg-blue-300 rounded-full -mt-2 -ml-1"
+                                                class="absolute z-30 w-6 h-6 top-0 left-0 bg-blue-500 rounded-full -mt-2 -ml-1"
                                                 :style="{
                                                     left: minthumb + '%',
                                                 }"
                                             ></div>
                                             <div
-                                                class="absolute z-30 w-6 h-6 top-0 right-0 bg-blue-300 rounded-full -mt-2 -mr-3"
+                                                class="absolute z-30 w-6 h-6 top-0 right-0 bg-blue-500 rounded-full -mt-2 -mr-3"
                                                 :style="{
                                                     right: maxthumb + '%',
                                                 }"
@@ -449,31 +626,36 @@ const changePrice = () => {
                                         <div>
                                             <input
                                                 type="text"
-                                                maxlength="5"
+                                                :maxlength="
+                                                    max.toString().length
+                                                "
                                                 @input="mintrigger"
                                                 v-model="minprice"
                                                 :min="min"
+                                                :max="max"
                                                 class="px-3 py-2 border border-gray-200 rounded w-24 text-center"
                                             />
                                         </div>
                                         <div>
                                             <input
                                                 type="text"
-                                                maxlength="5"
+                                                :maxlength="
+                                                    max.toString().length
+                                                "
                                                 @input="maxtrigger"
                                                 v-model="maxprice"
+                                                :min="min"
                                                 :max="max"
                                                 class="px-3 py-2 border border-gray-200 rounded w-24 text-center"
                                             />
                                         </div>
                                     </div>
-                                    <!-- End Muli Range -->
                                 </div>
+                                <!-- End Muli Range -->
 
+                                <!-- Category -->
                                 <Disclosure
                                     as="div"
-                                    v-for="section in filters"
-                                    :key="section.id"
                                     class="border-b border-gray-200 py-6"
                                     v-slot="{ open }"
                                 >
@@ -483,7 +665,7 @@ const changePrice = () => {
                                         >
                                             <span
                                                 class="font-medium text-gray-900"
-                                                >{{ section.name }}</span
+                                                >Category</span
                                             >
                                             <span
                                                 class="ml-6 flex items-center"
@@ -504,29 +686,84 @@ const changePrice = () => {
                                     <DisclosurePanel class="pt-6">
                                         <div class="space-y-4">
                                             <div
-                                                v-for="(
-                                                    option, optionIdx
-                                                ) in section.options"
-                                                :key="option.value"
+                                                v-for="category in categories"
+                                                :key="category.id"
                                                 class="flex items-center"
                                             >
                                                 <input
-                                                    :id="`filter-${section.id}-${optionIdx}`"
-                                                    :name="`${section.id}[]`"
-                                                    :value="option.value"
+                                                    :id="`filter-${category.name}`"
+                                                    :name="`${category.name}[]`"
+                                                    :value="category.id"
                                                     type="checkbox"
-                                                    :checked="option.checked"
+                                                    v-model="selectedCategory"
                                                     class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                                 />
                                                 <label
-                                                    :for="`filter-${section.id}-${optionIdx}`"
+                                                    :for="`filter-${category.name}`"
                                                     class="ml-3 text-sm text-gray-600"
-                                                    >{{ option.label }}</label
+                                                    >{{ category.name }}</label
                                                 >
                                             </div>
                                         </div>
                                     </DisclosurePanel>
                                 </Disclosure>
+                                <!-- End Category -->
+
+                                <!-- Brand -->
+                                <Disclosure
+                                    as="div"
+                                    class="border-b border-gray-200 py-6"
+                                    v-slot="{ open }"
+                                >
+                                    <h3 class="-my-3 flow-root">
+                                        <DisclosureButton
+                                            class="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500"
+                                        >
+                                            <span
+                                                class="font-medium text-gray-900"
+                                                >Brand</span
+                                            >
+                                            <span
+                                                class="ml-6 flex items-center"
+                                            >
+                                                <PlusIcon
+                                                    v-if="!open"
+                                                    class="h-5 w-5"
+                                                    aria-hidden="true"
+                                                />
+                                                <MinusIcon
+                                                    v-else
+                                                    class="h-5 w-5"
+                                                    aria-hidden="true"
+                                                />
+                                            </span>
+                                        </DisclosureButton>
+                                    </h3>
+                                    <DisclosurePanel class="pt-6">
+                                        <div class="space-y-4">
+                                            <div
+                                                v-for="brand in brands"
+                                                :key="brand.id"
+                                                class="flex items-center"
+                                            >
+                                                <input
+                                                    :id="`filter-${brand.name}`"
+                                                    :name="`${brand.name}[]`"
+                                                    :value="brand.id"
+                                                    type="checkbox"
+                                                    v-model="selectedBrand"
+                                                    class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                                />
+                                                <label
+                                                    :for="`filter-${brand.name}`"
+                                                    class="ml-3 text-sm text-gray-600"
+                                                    >{{ brand.name }}</label
+                                                >
+                                            </div>
+                                        </div>
+                                    </DisclosurePanel>
+                                </Disclosure>
+                                <!-- End Brand -->
                             </form>
 
                             <!-- Product grid -->
