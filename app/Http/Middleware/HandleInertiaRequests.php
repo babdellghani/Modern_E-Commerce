@@ -39,6 +39,7 @@ class HandleInertiaRequests extends Middleware
         return array_merge(parent::share($request), [
             'flash' => [
                 'success' => session('success'),
+                'error' => session('error'),
             ],
             'cartCount' => Cart::getCount(),
             'cartItems' => Cart::getCartItems($image = false),

@@ -29,25 +29,29 @@ onMounted(() => {
         <main class="p-4 md:ml-64 h-auto pt-20">
             <!-- Flash messages -->
             <div
-                v-if="$page.props.flash.success"
-                class="flex p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-200 dark:text-green-800"
+                v-if="$page.props.flash.success || $page.props.flash.error"
+                class="flex p-4 mb-4 text-sm rounded-lg"
+                :class="{
+                    'bg-red-100 text-red-700 dark:bg-red-200 dark:text-red-800': $page.props.flash.error,
+                    'bg-green-100 text-green-700 dark:bg-green-200 dark:text-green-800': $page.props.flash.success,
+                }"
                 role="alert"
             >
-                <span class="font-medium">{{ $page.props.flash.success }}</span>
+                <span class="font-medium">{{ $page.props.flash.success || $page.props.flash.error }}</span>
             </div>
-            
+
             <!-- Error messages -->
             <div
-                v-if="$page.props.flash.error"
+                v-if="$page.props.errors"
+                v-for="error in $page.props.errors"
                 class="flex p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800"
                 role="alert"
             >
-                <span class="font-medium">{{ $page.props.flash.error }}</span>
+                <span class="font-medium">{{ error }}</span>
             </div>
 
             <!-- Page content -->
             <slot />
-
         </main>
     </div>
 </template>

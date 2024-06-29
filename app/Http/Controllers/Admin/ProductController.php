@@ -70,7 +70,17 @@ class ProductController extends Controller
      */
     public function changePublished(string $id)
     {
+
         $product = Product::findOrFail($id);
+        if (!$product->published && ($product->images->count() == 0 || !$product->images)) {
+            return redirect()->back()->with('error', 'Please upload images first');
+        } else if (!$product->published && ($product->category_id == null)) {
+            return redirect()->back()->with('error', 'Please fill category first');
+        } else if (!$product->published && ($product->brand_id == null)) {
+            return redirect()->back()->with('error', 'Please fill brand first');
+        }
+
+        $product->updated_by = Auth::user()->id;
         $product->published = !$product->published;
         $product->save();
         if ($product->published) {
@@ -142,7 +152,7 @@ class ProductController extends Controller
         }
 
         // Delete product
-        $product->deleted_by = Auth::user()->id;
+        $product->update(['deleted_by' => Auth::user()->id]);
         $product->delete();
 
         // Redirect to index
@@ -167,10 +177,10 @@ class ProductController extends Controller
             }
 
             // Delete product
-            $product->deleted_by = Auth::user()->id;
+            $product->update(['deleted_by' => Auth::user()->id]);
             $product->delete();
         }
-        
+
         return redirect()->back()->with('success', 'Products deleted successfully');
     }
 }

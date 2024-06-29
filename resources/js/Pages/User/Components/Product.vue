@@ -81,210 +81,240 @@ const removeItem = async (id) => {
 
 // Pagination
 const changePage = (page) => {
-    router.visit(`/products?page=${page}`, {
+    const params = new URLSearchParams(window.location.search);
+    params.set("page", page);
+    router.visit(`/products?${params.toString()}`, {
         preserveState: true,
         preserveScroll: false,
+        replace: true,
     });
 };
 </script>
 
 <template>
-    <div
-        class="bg-white dark:bg-gray-900 mb-4 grid gap-4"
-        :class="productsPage ? 'sm:grid-cols-2 md:mb-8 lg:grid-cols-2 xl:grid-cols-3' : 'sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4'"
-    >
+    <div v-if="products.length > 0">
         <div
-            v-for="product in products"
-            class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            class="bg-white dark:bg-gray-900 mb-4 grid gap-4"
+            :class="
+                productsPage
+                    ? 'sm:grid-cols-2 md:mb-8 lg:grid-cols-2 xl:grid-cols-3'
+                    : 'sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4'
+            "
         >
-            <div class="h-56 w-full">
-                <a href="#">
-                    <img
-                        v-if="product.images && product.images.length > 0"
-                        class="mx-auto h-full dark:hidden object-cover"
-                        :src="`/storage/${product.images[0].image}`"
-                        :alt="product.name"
-                    />
-                    <img
-                        v-else
-                        class="mx-auto h-full dark:hidden object-cover"
-                        src="https://via.placeholder.com/150"
-                        :alt="product.name"
-                    />
-                </a>
-            </div>
-            <div class="pt-6">
-                <div class="mb-4 flex items-center justify-between gap-4">
-                    <span
-                        v-if="product.category"
-                        class="me-2 rounded bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                    >
-                        {{ product.category.name }}
-                    </span>
+            <div
+                v-for="product in products"
+                class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            >
+                <div class="h-56 w-full">
+                    <a href="#">
+                        <img
+                            v-if="product.images && product.images.length > 0"
+                            class="mx-auto h-full dark:hidden object-cover"
+                            :src="`/storage/${product.images[0].image}`"
+                            :alt="product.name"
+                        />
+                        <img
+                            v-else
+                            class="mx-auto h-full dark:hidden object-cover"
+                            src="https://via.placeholder.com/150"
+                            :alt="product.name"
+                        />
+                    </a>
+                </div>
+                <div class="pt-6">
+                    <div class="mb-4 flex items-center justify-between gap-4">
+                        <span
+                            v-if="product.category"
+                            class="me-2 rounded bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                        >
+                            {{ product.category.name }}
+                        </span>
 
-                    <div class="flex items-center justify-end gap-1">
-                        <button
-                            type="button"
-                            data-tooltip-target="tooltip-add-to-favorites"
-                            class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                        >
-                            <span class="sr-only"> Add to Favorites </span>
-                            <svg
-                                class="h-5 w-5"
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
+                        <div class="flex items-center justify-end gap-1">
+                            <button
+                                type="button"
+                                data-tooltip-target="tooltip-add-to-favorites"
+                                class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
                             >
-                                <path
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"
-                                />
-                            </svg>
-                        </button>
-                        <div
-                            id="tooltip-add-to-favorites"
-                            role="tooltip"
-                            class="tooltip invisible absolute z-10 inline-block rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-sm transition-opacity duration-300 dark:bg-gray-700"
-                            data-popper-placement="top"
-                        >
-                            Add to favorites
+                                <span class="sr-only"> Add to Favorites </span>
+                                <svg
+                                    class="h-5 w-5"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke="currentColor"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"
+                                    />
+                                </svg>
+                            </button>
                             <div
-                                class="tooltip-arrow"
-                                data-popper-arrow=""
-                            ></div>
+                                id="tooltip-add-to-favorites"
+                                role="tooltip"
+                                class="tooltip invisible absolute z-10 inline-block rounded-lg bg-gray-900 px-3 py-2 text-sm font-medium text-white opacity-0 shadow-sm transition-opacity duration-300 dark:bg-gray-700"
+                                data-popper-placement="top"
+                            >
+                                Add to favorites
+                                <div
+                                    class="tooltip-arrow"
+                                    data-popper-arrow=""
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a
+                        href="#"
+                        class="text-lg font-semibold leading-tight text-gray-900 hover:underline dark:text-white"
+                        >{{ product.name }}</a
+                    >
+
+                    <ul
+                        v-if="product.brand"
+                        class="mt-2 flex items-center gap-4"
+                    >
+                        <p
+                            class="text-sm font-medium text-gray-500 dark:text-gray-400"
+                        >
+                            {{ product.brand.name }}
+                        </p>
+                    </ul>
+
+                    <div class="mt-4 flex items-center justify-between gap-4">
+                        <p
+                            class="text-2xl font-extrabold leading-tight text-gray-900 dark:text-white"
+                        >
+                            {{ product.price }}$
+                        </p>
+
+                        <div
+                            v-if="!isProductInCart(product.id)"
+                            class="flex items-center justify-end gap-1"
+                        >
+                            <button
+                                type="button"
+                                class="inline-flex items-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                @click="addToCart(product)"
+                                v-if="product.quantity > 0"
+                            >
+                                <svg
+                                    class="-ms-2 me-2 h-5 w-5"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke="currentColor"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6"
+                                    />
+                                </svg>
+                                Add to cart
+                            </button>
+
+                            <button
+                                v-else
+                                type="button"
+                                class="inline-flex items-center rounded-lg bg-gray-200 px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                            >
+                                Not available
+                            </button>
+                        </div>
+                        <div v-else class="flex items-center">
+                            <button
+                                type="button"
+                                id="decrement-button"
+                                class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                                @click="
+                                    getProductQuantity(product.id) === 1
+                                        ? removeItem(product.id)
+                                        : updateQuantity(
+                                              product.id,
+                                              getProductQuantity(product.id) - 1
+                                          )
+                                "
+                            >
+                                <svg
+                                    class="h-2.5 w-2.5 text-gray-900 dark:text-white"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 18 2"
+                                >
+                                    <path
+                                        stroke="currentColor"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M1 1h16"
+                                    />
+                                </svg>
+                            </button>
+                            <input
+                                type="text"
+                                id="counter-input"
+                                class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
+                                disabled
+                                :value="getProductQuantity(product.id)"
+                                required
+                            />
+                            <button
+                                type="button"
+                                id="increment-button"
+                                class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+                                @click="
+                                    updateQuantity(
+                                        product.id,
+                                        getProductQuantity(product.id) + 1
+                                    )
+                                "
+                            >
+                                <svg
+                                    class="h-2.5 w-2.5 text-gray-900 dark:text-white"
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 18 18"
+                                >
+                                    <path
+                                        stroke="currentColor"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 1v16M1 9h16"
+                                    />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
-
-                <a
-                    href="#"
-                    class="text-lg font-semibold leading-tight text-gray-900 hover:underline dark:text-white"
-                    >{{ product.name }}</a
-                >
-
-                <ul v-if="product.brand" class="mt-2 flex items-center gap-4">
-                    <p
-                        class="text-sm font-medium text-gray-500 dark:text-gray-400"
-                    >
-                        {{ product.brand.name }}
-                    </p>
-                </ul>
-
-                <div class="mt-4 flex items-center justify-between gap-4">
-                    <p
-                        class="text-2xl font-extrabold leading-tight text-gray-900 dark:text-white"
-                    >
-                        {{ product.price }}$
-                    </p>
-
-                    <div
-                        v-if="!isProductInCart(product.id)"
-                        class="flex items-center justify-end gap-1"
-                    >
-                        <button
-                            type="button"
-                            class="inline-flex items-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                            @click="addToCart(product)"
-                            v-if="product.quantity > 0"
-                        >
-                            <svg
-                                class="-ms-2 me-2 h-5 w-5"
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6"
-                                />
-                            </svg>
-                            Add to cart
-                        </button>
-
-                        <button
-                            v-else
-                            type="button"
-                            class="inline-flex items-center rounded-lg bg-gray-200 px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-                        >
-                            Not available
-                        </button>
-                    </div>
-                    <div v-else class="flex items-center">
-                        <button
-                            type="button"
-                            id="decrement-button"
-                            class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-                            @click="
-                                getProductQuantity(product.id) === 1
-                                    ? removeItem(product.id)
-                                    : updateQuantity(
-                                          product.id,
-                                          getProductQuantity(product.id) - 1
-                                      )
-                            "
-                        >
-                            <svg
-                                class="h-2.5 w-2.5 text-gray-900 dark:text-white"
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 18 2"
-                            >
-                                <path
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M1 1h16"
-                                />
-                            </svg>
-                        </button>
-                        <input
-                            type="text"
-                            id="counter-input"
-                            class="w-10 shrink-0 border-0 bg-transparent text-center text-sm font-medium text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
-                            disabled
-                            :value="getProductQuantity(product.id)"
-                            required
-                        />
-                        <button
-                            type="button"
-                            id="increment-button"
-                            class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
-                            @click="
-                                updateQuantity(
-                                    product.id,
-                                    getProductQuantity(product.id) + 1
-                                )
-                            "
-                        >
-                            <svg
-                                class="h-2.5 w-2.5 text-gray-900 dark:text-white"
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 18 18"
-                            >
-                                <path
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 1v16M1 9h16"
-                                />
-                            </svg>
-                        </button>
-                    </div>
+            </div>
+        </div>
+    </div>
+    <div v-else class="flex items-center justify-center w-full">
+        <div class="empty-state">
+            <div class="empty-state__content">
+                <div class="empty-state__icon">
+                    <img
+                        src="storage/img/No_Product_Found.png"
+                        alt="No Product Found"
+                    />
+                </div>
+                <div class="empty-state__message">
+                    No Product Found
+                </div>
+                <div class="empty-state__help">
+                    We can't seem to find any products that match your search
                 </div>
             </div>
         </div>
@@ -292,7 +322,7 @@ const changePage = (page) => {
 
     <!-- Pagination -->
     <nav
-        v-if="productsPage"
+        v-if="productsPage && products.length > 0"
         class="flex flex-col items-start justify-between p-4 space-y-3 md:flex-row md:items-center md:space-y-0"
         aria-label="Table navigation"
     >
@@ -396,3 +426,37 @@ const changePage = (page) => {
         </ul>
     </nav>
 </template>
+
+<style scoped>
+.empty-state__content {
+    padding: 48px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+.empty-state__icon {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    border-radius: 200px;
+    justify-content: center;
+    background-color: #f7fafc;
+    box-shadow: 0px 2px 1px #e1e3ec;
+}
+.empty-state__icon img {
+    width: 170px;
+}
+
+.empty-state__message {
+    color: #38a169;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-top: 0.85rem;
+}
+
+.empty-state__help {
+    color: #a2a5b9;
+    font-size: 0.875rem;
+}
+</style>

@@ -23,7 +23,7 @@ import {
     Squares2X2Icon,
 } from "@heroicons/vue/20/solid";
 import Product from "./Components/Product.vue";
-import { Link, router, usePage } from "@inertiajs/vue3";
+import { router, usePage } from "@inertiajs/vue3";
 
 const productsPage = computed(() => usePage().props.products);
 const products = computed(() => productsPage.value.data);
@@ -33,22 +33,31 @@ const brands = computed(() => usePage().props.brands);
 const selectedCategory = ref([]);
 const selectedBrand = ref([]);
 
+const sort = ref("created_at");
+const order = ref("desc");
+
 const sortOptions = [
-    { name: "Newest", href: "?sort=created_at&order=desc", current: false },
-    { name: "Oldest", href: "?sort=created_at&order=asc", current: false },
+    {
+        name: "Newest",
+        sort: "created_at",
+        order: "desc",
+    },
+    {
+        name: "Oldest",
+        sort: "created_at",
+        order: "asc",
+    },
     {
         name: "Price: Low to High",
-        href: "?sort=price&order=asc",
-        current: false,
+        sort: "price",
+        order: "asc",
     },
     {
         name: "Price: High to Low",
-        href: "?sort=price&order=desc",
-        current: false,
+        sort: "price",
+        order: "desc",
     },
 ];
-
-const mobileFiltersOpen = ref(false);
 
 // Filter price
 const minprice = ref(0);
@@ -58,18 +67,9 @@ const max = ref(1000);
 const minthumb = ref(0);
 const maxthumb = ref(0);
 
-function mintrigger() {
-    minprice.value = Math.min(minprice.value, maxprice.value - 100);
-    minthumb.value =
-        ((minprice.value - min.value) / (max.value - min.value)) * 100;
-}
+const mobileFiltersOpen = ref(false);
 
-function maxtrigger() {
-    maxprice.value = Math.max(maxprice.value, minprice.value + 100);
-    maxthumb.value =
-        100 - ((maxprice.value - min.value) / (max.value - min.value)) * 100;
-}
-
+// Initialize from URL
 const initializeFromURL = () => {
     const params = new URLSearchParams(window.location.search);
 
@@ -83,24 +83,39 @@ const initializeFromURL = () => {
         .filter(([key]) => key.startsWith("brand["))
         .map(([, value]) => Number(value));
 
+    // Handle sort
+    const sortParam = params.get("sort");
+    const orderParam = params.get("order");
+    if (sortParam !== null && orderParam !== null) {
+        sort.value = sortParam;
+        order.value = orderParam;
+    }
     // Handle price
     const minPriceParam = params.get("price[0]");
     const maxPriceParam = params.get("price[1]");
     if (minPriceParam !== null && maxPriceParam !== null) {
         minprice.value = Number(minPriceParam);
         maxprice.value = Number(maxPriceParam);
-        mintrigger();
-        maxtrigger();
     }
-
-    console.log("Category:", selectedCategory.value);
-    console.log("Price:", [minprice.value, maxprice.value]);
 };
 
+// Muli Range Price
+function mintrigger() {
+    minprice.value = Math.min(minprice.value, maxprice.value - 100);
+    minthumb.value =
+        ((minprice.value - min.value) / (max.value - min.value)) * 100;
+}
+
+function maxtrigger() {
+    maxprice.value = Math.max(maxprice.value, minprice.value + 100);
+    maxthumb.value =
+        100 - ((maxprice.value - min.value) / (max.value - min.value)) * 100;
+}
+
 onMounted(() => {
+    initializeFromURL();
     mintrigger();
     maxtrigger();
-    initializeFromURL();
 });
 
 // Filter category and brand
@@ -108,19 +123,11 @@ watch([selectedCategory, selectedBrand, minprice, maxprice], () => {
     applyFilters();
 });
 
-// // Filter sort
-// watch([filtersForm.sort, filtersForm.order], () => {
-//     filtersForm
-//         .transform((data) => ({
-//             ...data,
-//             sort: filtersForm.sort,
-//             order: filtersForm.order,
-//         }))
-//         .get("products", {
-//             preserveState: true,
-//             replace: true,
-//         });
-// });
+const sortFilters = (sortF, orderF) => {
+    sort.value = sortF;
+    order.value = orderF;
+    applyFilters();
+};
 
 // // Filter search
 // watch(filtersForm.search, () => {
@@ -165,8 +172,11 @@ const applyFilters = () => {
             category: selectedCategory.value,
             brand: selectedBrand.value,
             price: [minprice.value, maxprice.value],
+            sort: sort.value,
+            order: order.value,
         },
         {
+            preserveScroll: true,
             preserveState: true,
             replace: true,
         }
@@ -341,6 +351,8 @@ const applyFilters = () => {
                                         <Disclosure
                                             as="div"
                                             class="border-b border-gray-200 py-6"
+                                            v-if="categories.length > 0"
+                                            defaultOpen
                                             v-slot="{ open }"
                                         >
                                             <h3 class="-my-3 flow-root">
@@ -401,6 +413,7 @@ const applyFilters = () => {
                                         <Disclosure
                                             as="div"
                                             class="border-b border-gray-200 py-6"
+                                            v-if="brands.length > 0"
                                             v-slot="{ open }"
                                         >
                                             <h3 class="-my-3 flow-root">
@@ -507,19 +520,26 @@ const applyFilters = () => {
                                                 :key="option.name"
                                                 v-slot="{ active }"
                                             >
-                                                <Link
-                                                    :href="option.href"
+                                                <div
+                                                    @click="
+                                                        sortFilters(
+                                                            option.sort,
+                                                            option.order
+                                                        )
+                                                    "
                                                     :class="[
-                                                        option.current
+                                                        sort == option.sort &&
+                                                        order == option.order
                                                             ? 'font-medium text-gray-900'
                                                             : 'text-gray-500',
                                                         active
                                                             ? 'bg-gray-100'
                                                             : '',
-                                                        'block px-4 py-2 text-sm',
+                                                        'block px-4 py-2 text-sm cursor-pointer',
                                                     ]"
-                                                    >{{ option.name }}</Link
                                                 >
+                                                    {{ option.name }}
+                                                </div>
                                             </MenuItem>
                                         </div>
                                     </MenuItems>
@@ -658,6 +678,8 @@ const applyFilters = () => {
                                     as="div"
                                     class="border-b border-gray-200 py-6"
                                     v-slot="{ open }"
+                                    defaultOpen
+                                    v-if="categories.length > 0"
                                 >
                                     <h3 class="-my-3 flow-root">
                                         <DisclosureButton
@@ -714,6 +736,7 @@ const applyFilters = () => {
                                     as="div"
                                     class="border-b border-gray-200 py-6"
                                     v-slot="{ open }"
+                                    v-if="brands.length > 0"
                                 >
                                     <h3 class="-my-3 flow-root">
                                         <DisclosureButton
