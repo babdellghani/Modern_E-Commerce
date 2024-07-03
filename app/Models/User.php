@@ -81,13 +81,16 @@ class User extends Authenticatable
      */
     public function getRedirectRoute(): string
     {
-        switch ($this->is_admin) {
-            case true:
-                return '/admin/dashboard';
-            case false:
-                return '/dashboard';
-            default:
-                return '/';
+        if (url()->previous() == route('login') || url()->previous() == route('register')) {
+            if ($this->isAdmin()) {
+                return route('admin.dashboard');
+            } else {
+                return route('home');
+            }
+        } elseif (url()->previous()) {
+            return url()->previous();
+        } else {
+            return route('home');
         }
     }
 
