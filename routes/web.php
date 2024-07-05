@@ -5,10 +5,11 @@ use App\Http\Controllers\User\CartController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\User\ChekcoutController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\User\ChekcoutController;
 use App\Http\Controllers\User\ProductViewController;
+use App\Http\Controllers\User\UserAddressController;
 use App\Http\Controllers\User\UserDashboardController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -41,7 +42,15 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+    // Dashboard
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+
+    // UserAddress
+    Route::prefix('user-address')->controller(UserAddressController::class)->group(function () {
+        Route::get('/', 'index')->name('user.address.index');
+        Route::post('/store', 'store')->name('user.address.store');
+        Route::delete('/{address}/destroy', 'destroy')->name('user.address.destroy');
+    });
 });
 
 
