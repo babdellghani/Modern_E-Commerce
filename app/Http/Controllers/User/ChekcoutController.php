@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Models\User;
 use Inertia\Inertia;
 use App\Helpers\Cart;
+use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class ChekcoutController extends Controller
@@ -16,7 +18,7 @@ class ChekcoutController extends Controller
      */
     public function index()
     {
-        $carts = Cart::getCartItems($image = true);
+        $carts = Cart::getCartItems($image = false);
         $total = Cart::getTotal();
         if (Auth::check()) {
             $user = User::find(Auth::user()->id)->with('addresses')->first();
@@ -46,7 +48,30 @@ class ChekcoutController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Create order
+        $order = Order::create([
+            'user_id' => Auth::user()->id,
+            'user_address_id' => $request->user_address_id,
+            'total' => Cart::getTotal(),
+            'status' => 'pending',
+            'session_id' => session()->getId()
+        ]);
+
+        // Create order items
+        $carts = Cart::getCartItems();
+        foreach ($carts as $cart) {
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $cart['id'],
+                'quantity' => $cart['quantity'],
+                'unit_price' => $cart['price']
+            ]);
+        }
+
+        // Clear cart
+        Cart::clearCartItems(Auth::user()->id);
+
+        return redirect()->route('user.checkout.order');
     }
 
     /**

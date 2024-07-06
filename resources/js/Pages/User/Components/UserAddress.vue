@@ -1,10 +1,6 @@
 <script setup>
 import InputError from "@/Components/InputError.vue";
-import { useForm, usePage } from "@inertiajs/vue3";
-
-defineProps({
-    user: Object,
-});
+import { router, useForm, usePage } from "@inertiajs/vue3";
 
 const form = useForm({
     type: "",
@@ -19,121 +15,13 @@ const form = useForm({
 });
 
 const AddAddress = () => {
-    form.post(
-        route("user.address.store", {
-            preserveScroll: true,
-        })
-    );
-};
-
-const DeleteAddress = ($id) => {
-    form.delete(
-        route(
-            "user.address.destroy",
-            {
-                id: $id,
-            },
-            {
-                preserveScroll: true,
-            }
-        )
-    );
+    router.post("user-address/add", {
+        preserveScroll: true,
+    });
 };
 </script>
 
 <template>
-    <div v-if="user && user.addresses" class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-            Select an address:
-        </h3>
-
-        <div class="flex sm:flex-row flex-col gap-5 flex-wrap">
-            <div
-                v-for="address in user.addresses"
-                class="rounded-lg sm:w-[calc(50%-1.25rem)] w-full border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800"
-            >
-                <div class="flex items-start">
-                    <div class="flex h-5 items-center">
-                        <input
-                            id="credit-card"
-                            aria-describedby="credit-card-text"
-                            type="radio"
-                            name="payment-method"
-                            value=""
-                            class="h-4 w-4 border-gray-300 bg-white text-blue-600 focus:ring-2 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-blue-600"
-                            checked
-                        />
-                    </div>
-
-                    <div class="ms-4 text-sm">
-                        <label
-                            for="credit-card"
-                            class="capitalize font-medium leading-none text-gray-900 dark:text-white"
-                        >
-                            {{ address.type }}
-                        </label>
-                        <p
-                            id="credit-card-text"
-                            class="mt-1 capitalize text-xs font-normal text-gray-500 dark:text-gray-400"
-                        >
-                            {{ address.address_1 }}
-                        </p>
-                        <p
-                            id="credit-card-text"
-                            class="mt-1 uppercase text-xs font-normal text-gray-500 dark:text-gray-400"
-                        >
-                            {{ address.city }}
-                        </p>
-                        <p
-                            id="credit-card-text"
-                            class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400"
-                        >
-                            {{ address.state }}
-                        </p>
-                        <p
-                            id="credit-card-text"
-                            class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400"
-                        >
-                            {{ address.postal_code }}
-                        </p>
-                        <p
-                            id="credit-card-text"
-                            class="mt-1 uppercase text-xs font-normal text-gray-500 dark:text-gray-400"
-                        >
-                            {{ address.country }}
-                        </p>
-                        <p
-                            id="credit-card-text"
-                            class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400"
-                        >
-                            {{ address.phone }}
-                        </p>
-                    </div>
-                </div>
-
-                <div class="mt-4 flex items-center gap-2">
-                    <button
-                        @click="DeleteAddress(address.id)"
-                        type="button"
-                        class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                    >
-                        Delete
-                    </button>
-
-                    <div
-                        class="h-3 w-px shrink-0 bg-gray-200 dark:bg-gray-700"
-                    ></div>
-
-                    <button
-                        type="button"
-                        class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                    >
-                        Edit
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
     <form
         @submit.prevent="AddAddress"
         class="grid grid-cols-1 gap-4 sm:grid-cols-2"

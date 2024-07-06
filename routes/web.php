@@ -48,8 +48,8 @@ Route::middleware([
     // UserAddress
     Route::prefix('user-address')->controller(UserAddressController::class)->group(function () {
         Route::get('/', 'index')->name('user.address.index');
-        Route::post('/store', 'store')->name('user.address.store');
-        Route::delete('/{address}/destroy', 'destroy')->name('user.address.destroy');
+        Route::post('/add', 'store')->name('user.address.store');
+        Route::delete('/{address}/delete', 'destroy')->name('user.address.destroy');
     });
 });
 

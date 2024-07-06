@@ -190,4 +190,14 @@ class Cart
         $cart = CartItem::where('user_id', $user_id)->where('product_id', $product_id)->firstOrFail();
         $cart->delete();
     }
+
+    /**
+     * Clear the cart items for User.
+     * 
+     * @return void
+     */
+    public static function clearCartItems(int $user_id)
+    {
+        CartItem::where('user_id', $user_id)->delete();
+    }
 }

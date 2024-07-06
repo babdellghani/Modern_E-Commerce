@@ -4,8 +4,8 @@ import UserAddress from "@/Pages/User/Components/UserAddress.vue";
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import Checkbox from "@/Components/Checkbox.vue";
-import { computed } from "vue";
-import { Link, useForm, usePage } from "@inertiajs/vue3";
+import { computed, ref } from "vue";
+import { Link, useForm, usePage, router } from "@inertiajs/vue3";
 
 const carts = computed(() => usePage().props.carts);
 const total = computed(() => usePage().props.total);
@@ -19,10 +19,28 @@ const form = useForm({
     terms: false,
 });
 
+const orderForm = useForm({
+    user_address_id: "",
+});
+
+const showModal = ref(false);
+
 const submit = () => {
     form.post(route("register"), {
         onFinish: () => form.reset("password", "password_confirmation"),
     });
+};
+
+const DeleteAddress = ($id) => {
+    router.delete(
+        `user-address/${$id}/delete`,
+        {
+            id: $id,
+        },
+        {
+            preserveScroll: true,
+        }
+    );
 };
 </script>
 
@@ -120,6 +138,7 @@ const submit = () => {
                                 Delivery Details
                             </h2>
 
+                            <!-- Register If user is Guest -->
                             <form
                                 v-if="!user"
                                 @submit.prevent="submit"
@@ -260,11 +279,141 @@ const submit = () => {
                                 </div>
                             </form>
 
-                            <!-- Address -->
+                            <!-- Select Address -->
+                            <div
+                                v-if="user && user.addresses"
+                                class="space-y-4"
+                            >
+                                <h3
+                                    class="text-lg font-semibold text-gray-900 dark:text-white"
+                                >
+                                    Select an address:
+                                </h3>
 
-                            
+                                <div
+                                    class="flex sm:flex-row flex-col gap-5 flex-wrap"
+                                >
+                                    <div
+                                        v-for="address in user.addresses"
+                                        :key="address.id"
+                                        class="rounded-lg sm:w-[calc(50%-1.25rem)] w-full border border-gray-200 bg-gray-50 p-4 ps-4 dark:border-gray-700 dark:bg-gray-800"
+                                    >
+                                        <div class="flex items-start">
+                                            <div class="flex h-5 items-center">
+                                                <input
+                                                    :id="`address-select-${address.id}`"
+                                                    :aria-describedby="`address-select-${address.id}`"
+                                                    type="radio"
+                                                    name="address-select"
+                                                    :value="address.id"
+                                                    v-model="
+                                                        orderForm.user_address_id
+                                                    "
+                                                    class="h-4 w-4 border-gray-300 bg-white text-blue-600 focus:ring-2 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-blue-600"
+                                                />
+                                            </div>
 
-                            <UserAddress :user="user" />
+                                            <div class="ms-4 text-sm">
+                                                <label
+                                                    :for="`address-select-${address.id}`"
+                                                    class="capitalize font-medium leading-none text-gray-900 dark:text-white"
+                                                >
+                                                    {{ address.type }}
+                                                </label>
+                                                <p
+                                                    id="credit-card-text"
+                                                    class="mt-1 capitalize text-xs font-normal text-gray-500 dark:text-gray-400"
+                                                >
+                                                    {{ address.address_1 }}
+                                                </p>
+                                                <p
+                                                    id="credit-card-text"
+                                                    class="mt-1 uppercase text-xs font-normal text-gray-500 dark:text-gray-400"
+                                                >
+                                                    {{ address.city }}
+                                                </p>
+                                                <p
+                                                    id="credit-card-text"
+                                                    class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400"
+                                                >
+                                                    {{ address.state }}
+                                                </p>
+                                                <p
+                                                    id="credit-card-text"
+                                                    class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400"
+                                                >
+                                                    {{ address.postal_code }}
+                                                </p>
+                                                <p
+                                                    id="credit-card-text"
+                                                    class="mt-1 uppercase text-xs font-normal text-gray-500 dark:text-gray-400"
+                                                >
+                                                    {{ address.country }}
+                                                </p>
+                                                <p
+                                                    id="credit-card-text"
+                                                    class="mt-1 text-xs font-normal text-gray-500 dark:text-gray-400"
+                                                >
+                                                    {{ address.phone }}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            class="mt-4 flex items-center gap-2"
+                                        >
+                                            <button
+                                                @click="
+                                                    DeleteAddress(address.id)
+                                                "
+                                                type="button"
+                                                class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                                            >
+                                                Delete
+                                            </button>
+
+                                            <div
+                                                class="h-3 w-px shrink-0 bg-gray-200 dark:bg-gray-700"
+                                            ></div>
+
+                                            <button
+                                                type="button"
+                                                class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                                            >
+                                                Edit
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button
+                                        @click="showModal = true"
+                                            :class="['flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700', showModal ? 'hidden' : 'block']"
+                                    >
+                                        <svg
+                                            class="h-5 w-5"
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            width="24"
+                                            height="24"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M5 12h14m-7 7V5"
+                                            />
+                                        </svg>
+                                        Add New Address
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Add & Edit Address -->
+                            <UserAddress
+                                :class="['', showModal ? 'block' : 'hidden']"
+                            />
                         </div>
 
                         <div class="space-y-4">
