@@ -5,10 +5,8 @@ namespace App\Http\Controllers\User;
 use Inertia\Inertia;
 use App\Models\Brand;
 use App\Models\Product;
-use App\Models\CartItem;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {

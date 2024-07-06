@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\User\ChekcoutController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\User\UserOrdersController;
 use App\Http\Controllers\User\ProductViewController;
 use App\Http\Controllers\User\UserAddressController;
 use App\Http\Controllers\User\UserDashboardController;
@@ -31,7 +32,9 @@ Route::prefix('cart')->controller(CartController::class)->group(function () {
 Route::controller(ChekcoutController::class)->group(function () {
     Route::get('/checkout', 'index')->name('checkout.index');
     Route::post('/checkout/order', 'store')->name('checkout.order');
-    Route::get('/order/{order}', 'show')->name('order.show');
+    Route::get('/success', 'success')->name('checkout.success');
+    Route::get('/cancel', 'cancel')->name('checkout.cancel');
+    Route::get('/order/{order}', 'show')->name('checkout.show');
 });
 
 
@@ -50,6 +53,12 @@ Route::middleware([
         Route::get('/', 'index')->name('user.address.index');
         Route::post('/add', 'store')->name('user.address.store');
         Route::delete('/{address}/delete', 'destroy')->name('user.address.destroy');
+    });
+
+    // Orders
+    Route::prefix('orders')->controller(UserOrdersController::class)->group(function () {
+        Route::get('/', 'index')->name('user.orders.index');
+        Route::get('/order/{order}', 'show')->name('user.orders.show');
     });
 });
 
