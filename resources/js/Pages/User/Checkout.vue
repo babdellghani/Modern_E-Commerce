@@ -26,16 +26,28 @@ const orderForm = useForm({
 const showModal = ref(false);
 
 const submit = () => {
-    form.post(route("register"), {
+    router.post("register", {
         onFinish: () => form.reset("password", "password_confirmation"),
     });
 };
 
-const DeleteAddress = ($id) => {
+const deleteAddress = ($id) => {
     router.delete(
         `user-address/${$id}/delete`,
         {
             id: $id,
+        },
+        {
+            preserveScroll: true,
+        }
+    );
+};
+
+const checkout = () => {
+    router.post(
+        "checkout/order",
+        {
+            ...orderForm,
         },
         {
             preserveScroll: true,
@@ -364,7 +376,7 @@ const DeleteAddress = ($id) => {
                                         >
                                             <button
                                                 @click="
-                                                    DeleteAddress(address.id)
+                                                    deleteAddress(address.id)
                                                 "
                                                 type="button"
                                                 class="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
@@ -384,9 +396,18 @@ const DeleteAddress = ($id) => {
                                             </button>
                                         </div>
                                     </div>
+
+                                    <InputError
+                                        class="w-full"
+                                        :message="$page.props.errors.user_address_id"
+                                    />
+
                                     <button
                                         @click="showModal = true"
-                                            :class="['flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700', showModal ? 'hidden' : 'block']"
+                                        :class="[
+                                            'flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700',
+                                            showModal ? 'hidden' : 'block',
+                                        ]"
                                     >
                                         <svg
                                             class="h-5 w-5"
@@ -690,7 +711,7 @@ const DeleteAddress = ($id) => {
                             </div>
                         </div>
 
-                        <div>
+                        <div v-if="carts.length > 0">
                             <label
                                 for="voucher"
                                 class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
@@ -716,6 +737,7 @@ const DeleteAddress = ($id) => {
                     </div>
 
                     <div
+                        v-if="carts.length > 0"
                         class="mt-6 w-full space-y-6 sm:mt-8 lg:mt-0 lg:max-w-xs xl:max-w-md"
                     >
                         <div class="flow-root">
@@ -801,6 +823,7 @@ const DeleteAddress = ($id) => {
 
                         <div class="space-y-3">
                             <button
+                                @click="checkout"
                                 type="submit"
                                 class="flex w-full items-center justify-center rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                             >
@@ -820,6 +843,21 @@ const DeleteAddress = ($id) => {
                                 >.
                             </p>
                         </div>
+                    </div>
+                    <div
+                        v-else
+                        class="mt-6 w-full space-y-6 sm:mt-8 lg:mt-0 lg:max-w-xs xl:max-w-md flex flex-col items-center justify-center gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:p-6"
+                    >
+                        <p
+                            class="text-center text-sm font-medium text-gray-500 dark:text-gray-400"
+                        >
+                            Your cart is empty
+                        </p>
+                        <Link
+                            :href="route('home')"
+                            class="block text-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-500"
+                            >Continue Shopping</Link
+                        >
                     </div>
                 </div>
             </div>

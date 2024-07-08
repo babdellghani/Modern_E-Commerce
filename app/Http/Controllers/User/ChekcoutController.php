@@ -48,13 +48,43 @@ class ChekcoutController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'user_address_id' => 'required',
+            'integer',
+            'exists:user_addresses,id'
+        ]);
+
+        if (!Auth::check() || Cart::getTotal() == 0) {
+            return redirect()->back()->with('error', 'Cart is empty');
+        }
+
+        // Stripe
+        $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+        $stripe->checkout->sessions->create([
+            'line_items' => [
+                [
+                    'price_data' => [
+                        'currency' => 'usd',
+                        'product_data' => [
+                            'name' => 'Ecommerce Pro Subscription',
+                        ],
+                        'unit_amount' => Cart::getTotal(),
+                    ],
+                    'quantity' => 1,
+                ],
+            ],
+            'mode' => 'subscription',
+            'success_url' => route('order.show', ':CHECKOUT_SESSION_ID'),
+            'cancel_url' => route('checkout.index'),
+        ]);
+
         // Create order
         $order = Order::create([
-            'user_id' => Auth::user()->id,
             'user_address_id' => $request->user_address_id,
-            'total' => Cart::getTotal(),
+            'total_price' => Cart::getTotal(),
             'status' => 'pending',
-            'session_id' => session()->getId()
+            'session_id' => session()->getId(),
+            'created_by' => Auth::user()->id
         ]);
 
         // Create order items
@@ -62,16 +92,16 @@ class ChekcoutController extends Controller
         foreach ($carts as $cart) {
             OrderItem::create([
                 'order_id' => $order->id,
-                'product_id' => $cart['id'],
+                'product_id' => $cart['product_id'],
                 'quantity' => $cart['quantity'],
-                'unit_price' => $cart['price']
+                'unit_price' => $cart['product']['price'],
             ]);
         }
 
         // Clear cart
         Cart::clearCartItems(Auth::user()->id);
 
-        return redirect()->route('user.checkout.order');
+        return redirect()->route('order.show', $order->id)->with('success', 'Order Submitted');
     }
 
     /**
@@ -79,7 +109,10 @@ class ChekcoutController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $orders = Order::where('id', $id)->with('address', 'items.product')->firstOrFail();
+        return Inertia::render('User/Order', [
+            'orders' => $orders
+        ]);
     }
 
     /**

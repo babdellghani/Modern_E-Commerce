@@ -10,7 +10,9 @@ class Order extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'total_price', 'status', 'session_id', 'user_address_id', 'created_by', 'updated_by'
+    ];
 
     public function items()
     {
