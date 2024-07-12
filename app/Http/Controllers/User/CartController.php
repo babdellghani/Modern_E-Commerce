@@ -5,7 +5,6 @@ namespace App\Http\Controllers\User;
 use Inertia\Inertia;
 use App\Helpers\Cart;
 use App\Models\Product;
-use App\Models\CartItem;
 use Illuminate\Http\Request;
 use App\Rules\ValidProductQuantity;
 use App\Http\Controllers\Controller;
